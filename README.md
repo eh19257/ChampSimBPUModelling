@@ -1,3 +1,18 @@
+# Cheatsheet
+
+`
+export PIN="/vagrant/tracer/pin/pin-3.22-98547-g7a303a835-gcc-linux/pin"
+export PIN_TRACER="/vagrant/tracer/pin/obj-intel64/champsim_tracer.so"
+`
+To tracer a program `$PIN -t $TRACER -o champsim-<program> -- <command line>`, if we then compress this traced file with `xz -v champsim-<program>` we can then run the output of this (`champsim-<program>.xz`) on `champsim` with `path/to/bin/champsim /path/to/champsim-<program>.xz`.
+
+
+
+
+
+
+
+
 <p align="center">
   <h1 align="center"> ChampSim </h1>
   <p> ChampSim is a trace-based simulator for a microarchitecture study. You can sign up to the public mailing list by sending an empty mail to champsim+subscribe@googlegroups.com. If you have questions about how to use ChampSim, you can often receive a quicker response on the mailing list. Please reserve GitHub Issues for bugs. <p>
