@@ -1,3 +1,5 @@
+./vagrant
+
 inc/champsim_constants.h
 inc/cache_modules.inc
 inc/ooo_cpu_modules.inc
