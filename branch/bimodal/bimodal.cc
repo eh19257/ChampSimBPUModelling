@@ -29,4 +29,5 @@ void O3_CPU::last_branch_result(uint64_t ip, uint64_t branch_target, uint8_t tak
     bimodal_table[this][hash] = std::min(bimodal_table[this][hash] + 1, ((1 << COUNTER_BITS) - 1));
   else
     bimodal_table[this][hash] = std::max(bimodal_table[this][hash] - 1, 0);
+  //cout << "Updating the bimodal_table. ip: " << ip << " sets the bit counter to " << bimodal_table[this][hash];
 }
