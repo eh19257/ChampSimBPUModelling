@@ -31,7 +31,7 @@
 #define REG_FLAGS 25
 #define REG_INSTRUCTION_POINTER 26
 
-// branch types
+// branch types 
 #define NOT_BRANCH 0
 #define BRANCH_DIRECT_JUMP 1
 #define BRANCH_INDIRECT 2
