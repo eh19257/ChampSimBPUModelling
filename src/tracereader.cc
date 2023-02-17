@@ -73,6 +73,8 @@ ooo_model_instr tracereader::read_single_instr()
     open(trace_string);
   }
 
+  //std::cout << "Read instruction"
+
   // copy the instruction into the performance model's instruction format
   ooo_model_instr retval(cpu, trace_read_instr);
   return retval;
@@ -142,6 +144,8 @@ public:
     ooo_model_instr retval = last_instr;
 
     last_instr = trace_read_instr;
+
+    //std::cout << "Getting " << retval.instr_id << std::endl;
     return retval;
   }
 };

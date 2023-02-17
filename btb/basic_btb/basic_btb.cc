@@ -7,6 +7,7 @@
  */
 
 #include "ooo_cpu.h"
+#include <iostream>
 
 #define BASIC_BTB_SETS 1024
 #define BASIC_BTB_WAYS 8
@@ -153,6 +154,8 @@ void O3_CPU::initialize_btb()
 
 std::pair<uint64_t, uint8_t> O3_CPU::btb_prediction(uint64_t ip, uint8_t branch_type)
 {
+  //std::cout << "Instruction " << ip << " has branch type of " << (int) branch_type << "\n";// std::printf("Instruction %o has branch type of %d\n", ip, branch_type);
+
   uint8_t always_taken = false;
   if (branch_type != BRANCH_CONDITIONAL) {
     always_taken = true;

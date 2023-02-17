@@ -100,6 +100,11 @@ struct ooo_model_instr {
 
     std::copy(std::begin(instr.asid), std::begin(instr.asid), std::begin(this->asid));
   }
+
+  // custom stuff
+  void print(){
+    std::cout << "IP : " << this->ip << " RD : " << this->destination_registers << " RD : " << this->source_registers << " MD : " << this->destination_memory << " : SD " << this->source_memory << " Branch? " << this->is_branch << ", Memory? " << this->is_memory <<std::endl;
+  }
 };
 
 #endif
