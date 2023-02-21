@@ -102,7 +102,7 @@ public:
   void operate();
 
   // functions
-  void init_instruction(ooo_model_instr instr);
+  void init_instruction(ooo_model_instr instr, FILE* data_stream);
   void check_dib();
   void translate_fetch();
   void fetch_instruction();

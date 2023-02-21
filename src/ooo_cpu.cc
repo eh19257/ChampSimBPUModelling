@@ -58,7 +58,7 @@ void O3_CPU::initialize_core()
   impl_btb_initialize();
 }
 
-void O3_CPU::init_instruction(ooo_model_instr arch_instr)
+void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE * data_stream)
 {
   instrs_to_read_this_cycle--;
 
@@ -269,6 +269,9 @@ void O3_CPU::init_instruction(ooo_model_instr arch_instr)
     arch_instr.num_reg_ops = 0;
   }
 
+  // print arch_instr to the data file
+  arch_instr.print(data_stream);
+
   // Add to IFETCH_BUFFER
   IFETCH_BUFFER.push_back(arch_instr);
 
@@ -428,6 +431,9 @@ void O3_CPU::decode_instruction()
 {
   std::size_t available_decode_bandwidth = DECODE_WIDTH;
 
+  //FILE * data = fopen("DATA!!!!!", "ab");
+  //printf("decoding instruction()\n");
+
   // Send decoded instructions to dispatch
   while (available_decode_bandwidth > 0 && DECODE_BUFFER.has_ready() && !DISPATCH_BUFFER.full()) {
     ooo_model_instr& db_entry = DECODE_BUFFER.front();
@@ -445,6 +451,9 @@ void O3_CPU::decode_instruction()
       }
     }
 
+    // grabbing data
+    //db_entry.print(data);
+
     // Add to dispatch
     if (warmup_complete[cpu])
       DISPATCH_BUFFER.push_back(db_entry);
@@ -455,6 +464,7 @@ void O3_CPU::decode_instruction()
     available_decode_bandwidth--;
   }
 
+  //fclose(data);
   // check for deadlock
   if (!std::empty(DECODE_BUFFER) && (DECODE_BUFFER.front().event_cycle + DEADLOCK_CYCLE) <= current_cycle)
     throw champsim::deadlock{cpu};

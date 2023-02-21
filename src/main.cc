@@ -436,14 +436,18 @@ int main(int argc, char** argv)
 
     for (std::size_t i = 0; i < ooo_cpu.size(); ++i) {
       // read from trace
+
+      FILE * data = fopen("data", "wb");
       while (ooo_cpu[i]->fetch_stall == 0 && ooo_cpu[i]->instrs_to_read_this_cycle > 0) {
-        //std::cout << "instructions " << i << std::endl;
         ooo_model_instr foo = traces[i]->get();
 
-        foo.print();
-        ooo_cpu[i]->init_instruction(foo);
+        //foo.print(stdout);
+        
+        ooo_cpu[i]->init_instruction(foo, data);
         //ooo_cpu[i]->init_instruction(traces[i]->get());
       }
+      
+      fclose(data);
 
       // heartbeat information
       if (show_heartbeat && (ooo_cpu[i]->num_retired >= ooo_cpu[i]->next_print_instruction)) {

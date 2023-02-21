@@ -102,8 +102,9 @@ struct ooo_model_instr {
   }
 
   // custom stuff
-  void print(){
-    std::cout << "IP : " << this->ip << " RD : " << this->destination_registers << " RD : " << this->source_registers << " MD : " << this->destination_memory << " : SD " << this->source_memory << " Branch? " << this->is_branch << ", Memory? " << this->is_memory <<std::endl;
+  void print(FILE * stream){
+    //std::cout << "IP : " << this->ip << " RD : " << this->destination_registers << " RD : " << this->source_registers << " MD : " << this->destination_memory << " : SD " << this->source_memory << " Branch? " << this->is_branch << ", Memory? " << this->is_memory <<std::endl;
+    fprintf(stream, "IP : %u; RD : %hhu; RS : %hhu; MD : %u, SD : %u; Branch? %d; Memory? %d.\n", this->ip, this->destination_registers, this->source_registers, this->destination_memory, this->source_memory, this->is_branch, this->is_memory);
   }
 };
 
