@@ -14,7 +14,7 @@ obj/
 **/*.d
 
 tracer/pin/obj-intel64/
-tracer/pin/pin-3.22-98547-g7a303a835-gcc-linux
+tracer/pin/pin-3.26-98690-g1fc9d60e6-gcc-linux
 
 
 
