@@ -32,6 +32,19 @@
 
 using namespace std;
 
+// Struct that is used to store the data of a single branch instruction
+struct bp_model_packet{
+  uint64_t ip = 0;
+  uint64_t branch_addr = 0;
+  uint8_t  branch_type = 0;
+
+  bp_model_packet(uint64_t ip, uint64_t branch_addr, uint8_t branch_type){
+    this->ip = ip;
+    this->branch_addr = branch_addr;
+    this->branch_type = branch_type;
+  }
+};
+
 class CACHE;
 
 class CacheBus : public MemoryRequestProducer
@@ -104,7 +117,7 @@ public:
   void operate();
 
   // functions
-  void init_instruction(ooo_model_instr instr, std::ofstream* data_stream);
+  void init_instruction(ooo_model_instr instr, FILE * data_stream);
   void check_dib();
   void translate_fetch();
   void fetch_instruction();

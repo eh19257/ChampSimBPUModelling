@@ -58,7 +58,7 @@ void O3_CPU::initialize_core()
   impl_btb_initialize();
 }
 
-void O3_CPU::init_instruction(ooo_model_instr arch_instr, std::ofstream* data_stream)
+void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE* data_stream)
 {
   instrs_to_read_this_cycle--;
 
@@ -230,9 +230,9 @@ void O3_CPU::init_instruction(ooo_model_instr arch_instr, std::ofstream* data_st
       predicted_branch_target = 0;
     }
 
-    // Get the data
-    const char* foo = "asdf";
-    data_stream->write(foo, 4);
+    // Get branching data for each instruction
+    bp_model_packet single_packet(arch_instr.ip, predicted_branch_target, arch_instr.branch_type);
+    fwrite(&single_packet, sizeof(bp_model_packet), 1, data_stream);
 
     // call code prefetcher every time the branch predictor is used
     impl_prefetcher_branch_operate(arch_instr.ip, arch_instr.branch_type, predicted_branch_target);
@@ -434,9 +434,6 @@ void O3_CPU::promote_to_decode()
 void O3_CPU::decode_instruction()
 {
   std::size_t available_decode_bandwidth = DECODE_WIDTH;
-
-  //FILE * data = fopen("DATA!!!!!", "ab");
-  //printf("decoding instruction()\n");
 
   // Send decoded instructions to dispatch
   while (available_decode_bandwidth > 0 && DECODE_BUFFER.has_ready() && !DISPATCH_BUFFER.full()) {
