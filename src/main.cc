@@ -23,6 +23,8 @@
 #include <signal.h>
 #include <string.h>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 #include "cache.h"
 #include "champsim.h"
@@ -410,6 +412,8 @@ int main(int argc, char** argv)
     (*it)->impl_replacement_initialize();
   }
 
+  std::ofstream data("data", std::ofstream::out | std::ofstream::binary);
+
   // simulation entry point
   while (std::any_of(std::begin(simulation_complete), std::end(simulation_complete), std::logical_not<uint8_t>())) {
 
@@ -437,17 +441,13 @@ int main(int argc, char** argv)
     for (std::size_t i = 0; i < ooo_cpu.size(); ++i) {
       // read from trace
 
-      FILE * data = fopen("data", "wb");
+      
       while (ooo_cpu[i]->fetch_stall == 0 && ooo_cpu[i]->instrs_to_read_this_cycle > 0) {
         ooo_model_instr foo = traces[i]->get();
-
-        //foo.print(stdout);
-        
-        ooo_cpu[i]->init_instruction(foo, data);
+       
+        ooo_cpu[i]->init_instruction(foo, &data); //&data
         //ooo_cpu[i]->init_instruction(traces[i]->get());
       }
-      
-      fclose(data);
 
       // heartbeat information
       if (show_heartbeat && (ooo_cpu[i]->num_retired >= ooo_cpu[i]->next_print_instruction)) {
@@ -495,6 +495,8 @@ int main(int argc, char** argv)
       }
     }
   }
+
+  //data.close();
 
   uint64_t elapsed_second = (uint64_t)(time(NULL) - start_time), elapsed_minute = elapsed_second / 60, elapsed_hour = elapsed_minute / 60;
   elapsed_minute -= elapsed_hour * 60;

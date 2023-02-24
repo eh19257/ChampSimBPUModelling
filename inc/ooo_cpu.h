@@ -20,6 +20,8 @@
 #include <array>
 #include <functional>
 #include <queue>
+#include <iostream>
+#include <fstream>
 
 #include "block.h"
 #include "champsim.h"
@@ -102,7 +104,7 @@ public:
   void operate();
 
   // functions
-  void init_instruction(ooo_model_instr instr, FILE* data_stream);
+  void init_instruction(ooo_model_instr instr, std::ofstream* data_stream);
   void check_dib();
   void translate_fetch();
   void fetch_instruction();

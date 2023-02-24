@@ -73,6 +73,8 @@ ooo_model_instr tracereader::read_single_instr()
     open(trace_string);
   }
 
+  //printf("%llx %hhu %hhu %hhu %hhu %llx %llx\n", &trace_read_instr);
+
   //std::cout << "Read instruction"
 
   // copy the instruction into the performance model's instruction format

@@ -58,7 +58,7 @@ void O3_CPU::initialize_core()
   impl_btb_initialize();
 }
 
-void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE * data_stream)
+void O3_CPU::init_instruction(ooo_model_instr arch_instr, std::ofstream* data_stream)
 {
   instrs_to_read_this_cycle--;
 
@@ -230,6 +230,10 @@ void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE * data_stream)
       predicted_branch_target = 0;
     }
 
+    // Get the data
+    const char* foo = "asdf";
+    data_stream->write(foo, 4);
+
     // call code prefetcher every time the branch predictor is used
     impl_prefetcher_branch_operate(arch_instr.ip, arch_instr.branch_type, predicted_branch_target);
 
@@ -270,7 +274,7 @@ void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE * data_stream)
   }
 
   // print arch_instr to the data file
-  arch_instr.print(data_stream);
+  
 
   // Add to IFETCH_BUFFER
   IFETCH_BUFFER.push_back(arch_instr);
