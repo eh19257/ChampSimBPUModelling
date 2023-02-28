@@ -25,6 +25,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include "cache.h"
 #include "champsim.h"
@@ -39,6 +40,8 @@ uint8_t warmup_complete[NUM_CPUS] = {}, simulation_complete[NUM_CPUS] = {}, all_
         MAX_INSTR_DESTINATIONS = NUM_INSTR_DESTINATIONS, knob_cloudsuite = 0, knob_low_bandwidth = 0;
 
 uint64_t warmup_instructions = 1000000, simulation_instructions = 10000000;
+
+std::string DATA_OUTPUT_FILE;
 
 auto start_time = time(NULL);
 
@@ -337,7 +340,11 @@ int main(int argc, char** argv)
 
   // check to see if knobs changed using getopt_long()
   int traces_encountered = 0;
-  static struct option long_options[] = {{"warmup_instructions", required_argument, 0, 'w'},
+
+  DATA_OUTPUT_FILE = std::string();
+
+  static struct option long_options[] = {{"data_output_file", required_argument, 0, 'f'},
+                                         {"warmup_instructions", required_argument, 0, 'w'},
                                          {"simulation_instructions", required_argument, 0, 'i'},
                                          {"hide_heartbeat", no_argument, 0, 'h'},
                                          {"cloudsuite", no_argument, 0, 'c'},
@@ -345,8 +352,12 @@ int main(int argc, char** argv)
                                          {0, 0, 0, 0}};
 
   int c;
-  while ((c = getopt_long_only(argc, argv, "w:i:hc", long_options, NULL)) != -1 && !traces_encountered) {
+  while ((c = getopt_long_only(argc, argv, "f:w:i:hc", long_options, NULL)) != -1 && !traces_encountered) {
     switch (c) {
+    case 'f':
+      DATA_OUTPUT_FILE = std::string(optarg);
+      std::cout << "Writing data to the output file: " << DATA_OUTPUT_FILE << "\n" << std::endl;
+      break;
     case 'w':
       warmup_instructions = atol(optarg);
       break;
@@ -413,7 +424,12 @@ int main(int argc, char** argv)
   }
 
   //std::ofstream data("data", std::ofstream::out | std::ofstream::binary);
-  FILE * data = fopen("data/bp_models/2_bit/test1.bin", "wb");
+  FILE * data = NULL;
+  if (!DATA_OUTPUT_FILE.empty()) {
+    data = fopen(DATA_OUTPUT_FILE.c_str(), "wb");
+    printf("%s\n", DATA_OUTPUT_FILE.c_str());
+  }
+  //data = fopen(DATA_OUTPUT_FILE, "wb");
 
   // simulation entry point
   while (std::any_of(std::begin(simulation_complete), std::end(simulation_complete), std::logical_not<uint8_t>())) {
@@ -445,8 +461,7 @@ int main(int argc, char** argv)
       
       while (ooo_cpu[i]->fetch_stall == 0 && ooo_cpu[i]->instrs_to_read_this_cycle > 0) {
         ooo_model_instr foo = traces[i]->get();
-       
-        ooo_cpu[i]->init_instruction(foo, data); //&data
+        ooo_cpu[i]->init_instruction(foo, data);
         //ooo_cpu[i]->init_instruction(traces[i]->get());
       }
 
@@ -496,8 +511,8 @@ int main(int argc, char** argv)
       }
     }
   }
-
-  fclose(data);
+  // Closing output file
+  if (!DATA_OUTPUT_FILE.empty()) fclose(data);
 
   uint64_t elapsed_second = (uint64_t)(time(NULL) - start_time), elapsed_minute = elapsed_second / 60, elapsed_hour = elapsed_minute / 60;
   elapsed_minute -= elapsed_hour * 60;

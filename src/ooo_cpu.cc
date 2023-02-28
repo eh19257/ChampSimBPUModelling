@@ -228,16 +228,15 @@ void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE* data_stream)
     uint8_t branch_prediction = impl_predict_branch(arch_instr.ip, predicted_branch_target, always_taken, arch_instr.branch_type);
     if ((branch_prediction == 0) && (always_taken == 0)) {
       predicted_branch_target = 0;
-    }
-
-    // Get branching data for each instruction
-    bp_model_packet single_packet(arch_instr.ip, predicted_branch_target, arch_instr.branch_type);
-    fwrite(&single_packet, sizeof(bp_model_packet), 1, data_stream);
+    }   
 
     // call code prefetcher every time the branch predictor is used
     impl_prefetcher_branch_operate(arch_instr.ip, arch_instr.branch_type, predicted_branch_target);
 
+    //uint8_t mispredicted = 0;
+
     if (predicted_branch_target != arch_instr.branch_target) {
+      //mispredicted = 1;
       branch_mispredictions++;
       total_rob_occupancy_at_branch_mispredict += ROB.occupancy();
       branch_type_misses[arch_instr.branch_type]++;
@@ -253,6 +252,13 @@ void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE* data_stream)
         instrs_to_read_this_cycle = 0;
       }
     }
+
+
+    // Get branching data for each instruction
+    if (data_stream != NULL){
+      bp_model_packet single_packet(arch_instr.ip, arch_instr.branch_type, predicted_branch_target, branch_prediction);//, mispredicted);
+      fwrite(&single_packet, sizeof(bp_model_packet), 1, data_stream);
+    } 
 
     impl_update_btb(arch_instr.ip, arch_instr.branch_target, arch_instr.branch_taken, arch_instr.branch_type);
     impl_last_branch_result(arch_instr.ip, arch_instr.branch_target, arch_instr.branch_taken, arch_instr.branch_type);
