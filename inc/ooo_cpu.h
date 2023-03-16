@@ -45,10 +45,10 @@ struct bp_model_packet{
   //uint8_t mispredicted = 0;
 
   bp_model_packet(uint64_t ip, uint8_t branch_type, uint64_t branch_addr, uint8_t branch_prediction){//, uint8_t mispredicted){
-    this->ip = ip;
+    this->ip = static_cast<double>(ip);
     this->branch_type = branch_type;
 
-    this->branch_addr = branch_addr;
+    this->branch_addr = static_cast<double>(branch_addr);
     this->branch_prediciton = branch_prediction;
 
     //this->mispredicted = mispredicted;
