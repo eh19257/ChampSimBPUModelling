@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import time
 from multiprocessing import cpu_count
+from typing import Union, NamedTuple
 
 import torch
 import torch.backends.cudnn
@@ -51,7 +52,7 @@ class Model(nn.Module):
         self.RNN = nn.RNN(in_size, hidden_size, num_layers)
 
         # Fully connected layer component
-        self.full_connected = nn.Linear(hidden_size, out_size)
+        self.fully_connected = nn.Linear(hidden_size, out_size)
     
 
     def forward(self, x: torch.Tensor) -> torch.Tensor: 
@@ -64,9 +65,14 @@ class Model(nn.Module):
         # input data & hidden state is given to the RNN
         out, hidden = self.RNN(x, hidden)
 
+        print(out.shape)
+        print(out)
+
         # We now need to crush the output of the RNN so that it can fit into the input of our fully connected layer
-        out = out.contigious().view(-1, self.hidden_size)
+        #out = out.contigious().view(-1, self.hidden_size)
+        out = out.reshape((-1, self.hidden_size))
         out = self.fully_connected(out)
+        #print(out)
         
         return out, hidden
 
@@ -121,8 +127,8 @@ class Trainer:
             self.model.train()
             data_load_start_time = time.time()
             for batch, labels in self.train_loader:
-                batch = batch.to(self.device)
-                labels = labels.to(self.device)
+                batch = torch.unsqueeze(batch, dim=0).to(self.device)
+                labels = torch.unsqueeze(labels, dim=0).to(self.device)
                 data_load_end_time = time.time()
 
 
@@ -131,8 +137,13 @@ class Trainer:
                 
                 #m = nn.Conv2d(3, 32, (5, 5), padding = 4)
                 #output = m(batch)
-                
+                #print("batch:",batch)
+                #print("label:", labels)
+                #print(batch.shape)
+                #foo = torch.unsqueeze(batch, dim=0)
                 logits = self.model.forward(batch)
+                print("logits:", logits)
+                print("lablel:", labels)
                 #print(output.shape)
                 #import sys; sys.exit(1)
 
@@ -144,7 +155,7 @@ class Trainer:
                 ##         store it in a variable called `loss`
                 #loss = torch.tensor(0)
 
-                loss = self.criterion(logits, labels)
+                loss = self.criterion(logits[0], labels)
 
                 ## TASK 10: Compute the backward pass
 
@@ -156,7 +167,7 @@ class Trainer:
                 self.optimizer.zero_grad()
 
                 with torch.no_grad():
-                    preds = logits.argmax(-1)
+                    preds = logits[0].argmax(-1)
                     accuracy = compute_accuracy(labels, preds)
 
                 data_load_time = data_load_end_time - data_load_start_time
@@ -169,7 +180,7 @@ class Trainer:
                 self.step += 1
                 data_load_start_time = time.time()
 
-            self.summary_writer.add_scalar("epoch", epoch, self.step)
+            #self.summary_writer.add_scalar("epoch", epoch, self.step)
             if ((epoch + 1) % val_frequency) == 0:
                 self.validate()
                 # self.validate() will put the model in validation mode,
@@ -240,16 +251,29 @@ class Trainer:
                 self.step
         )
         print(f"validation loss: {average_loss:.5f}, accuracy: {accuracy * 100:2.2f}")
+    
+
+def compute_accuracy(
+    labels: Union[torch.Tensor, np.ndarray], preds: Union[torch.Tensor, np.ndarray]
+) -> float:
+    """
+    Args:
+        labels: ``(batch_size, class_count)`` tensor or array containing example labels
+        preds: ``(batch_size, class_count)`` tensor or array containing model prediction
+    """
+    assert len(labels) == len(preds)
+    return float((labels == preds).sum()) / len(labels)
 
 
 def main():
 
     FILENAME = "2_bit_ls_float.bin"
     # Use GPU if their avaliable
-    if torch.cuda.is_available():
-        DEVICE = torch.device("cuda")
-    else:
-        DEVICE = torch.device("cpu")
+    #if torch.cuda.is_available():
+    #    DEVICE = torch.device("cuda")
+    #else:
+    
+    DEVICE = torch.device("cpu")
 
 
     # Hyper parameters
@@ -260,7 +284,7 @@ def main():
     # /     Data loading
     #/
 
-    BATCHSIZE = 1
+    BATCHSIZE = 5
     WORKER_COUNT = 4
 
     train_dataset = Dataset(FILENAME)
@@ -273,6 +297,13 @@ def main():
         num_workers = WORKER_COUNT,#args.worker_count,
     )
 
+    test = DataLoader(
+        train_dataset,
+        shuffle=False,
+        batch_size = BATCHSIZE,#args.batch_size,
+        pin_memory=True,
+        num_workers = WORKER_COUNT,#args.worker_count,
+    )
     in_size = 3#len(train_dataset.x_train)
     out_size = 1
     hidden_size = 1
