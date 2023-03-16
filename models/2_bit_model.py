@@ -246,11 +246,10 @@ def main():
 
     FILENAME = "2_bit_ls_float.bin"
     # Use GPU if their avaliable
-    #if torch.cuda.is_available():
-    #    DEVICE = torch.device("cuda")
-    #else:
-    
-    DEVICE = torch.device("cpu")
+    if torch.cuda.is_available():
+        DEVICE = torch.device("cuda")
+    else:
+        DEVICE = torch.device("cpu")
 
 
     # Hyper parameters
