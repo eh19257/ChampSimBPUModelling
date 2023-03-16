@@ -356,7 +356,6 @@ int main(int argc, char** argv)
     switch (c) {
     case 'f':
       DATA_OUTPUT_FILE = std::string(optarg);
-      std::cout << "Writing data to the output file: " << DATA_OUTPUT_FILE << "\n" << std::endl;
       break;
     case 'w':
       warmup_instructions = atol(optarg);
@@ -427,9 +426,9 @@ int main(int argc, char** argv)
   FILE * data = NULL;
   if (!DATA_OUTPUT_FILE.empty()) {
     data = fopen(DATA_OUTPUT_FILE.c_str(), "wb");
-    printf("%s\n", DATA_OUTPUT_FILE.c_str());
+    std::cout << "Writing data to the output file: " << DATA_OUTPUT_FILE << std::endl;
   }
-  //data = fopen(DATA_OUTPUT_FILE, "wb");
+
 
   // simulation entry point
   while (std::any_of(std::begin(simulation_complete), std::end(simulation_complete), std::logical_not<uint8_t>())) {

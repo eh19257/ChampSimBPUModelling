@@ -27,9 +27,9 @@
             "dispatch_latency": 1,
             "schedule_latency": 0,
             "execute_latency": 0,
-            "branch_predictor": "2_bit",
+            "branch_predictor": "bimodal",
             "btb": "basic_btb"
-        }
+	} 
     ],
 
     "DIB": {
