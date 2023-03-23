@@ -58,7 +58,7 @@ void O3_CPU::initialize_core()
   impl_btb_initialize();
 }
 
-void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE* data_stream)
+void O3_CPU::init_instruction(ooo_model_instr arch_instr, std::fstream * data_stream)
 {
   instrs_to_read_this_cycle--;
 
@@ -256,8 +256,12 @@ void O3_CPU::init_instruction(ooo_model_instr arch_instr, FILE* data_stream)
 
     // Get branching data for each instruction
     if (data_stream != NULL){
-      bp_model_packet single_packet(arch_instr.ip, arch_instr.branch_type, predicted_branch_target, branch_prediction);//, mispredicted);
-      fwrite(&single_packet, sizeof(bp_model_packet), 1, data_stream);
+      bp_model_packet single_packet(arch_instr.ip, (uint64_t) arch_instr.branch_type, predicted_branch_target, (uint64_t) branch_prediction);//, mispredicted);
+      //bp_model_packet single_packet(0xFFEEDDCCBBAA9988, 0xEE, 0x7766554433221100, 0xCC);
+      //fwrite(&single_packet, sizeof(bp_model_packet), 1, data_stream);
+      data_stream->write((char*)&single_packet, sizeof(bp_model_packet));
+      //data_stream << single_packet;
+      //data_stream->flush();
     } 
 
     impl_update_btb(arch_instr.ip, arch_instr.branch_target, arch_instr.branch_taken, arch_instr.branch_type);

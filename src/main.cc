@@ -423,9 +423,11 @@ int main(int argc, char** argv)
   }
 
   //std::ofstream data("data", std::ofstream::out | std::ofstream::binary);
-  FILE * data = NULL;
+  //FILE * data = NULL;
+  std::fstream * data = NULL;
   if (!DATA_OUTPUT_FILE.empty()) {
-    data = fopen(DATA_OUTPUT_FILE.c_str(), "wb");
+    data = new std::fstream(DATA_OUTPUT_FILE, std::ios::out | std::ios::binary);
+    //data = fopen(DATA_OUTPUT_FILE.c_str(), "wb");
     std::cout << "Writing data to the output file: " << DATA_OUTPUT_FILE << std::endl;
   }
 
@@ -511,7 +513,12 @@ int main(int argc, char** argv)
     }
   }
   // Closing output file
-  if (!DATA_OUTPUT_FILE.empty()) fclose(data);
+  if (!DATA_OUTPUT_FILE.empty()) {
+    cout << "Closing the data collection file: " << DATA_OUTPUT_FILE << std::endl;
+    //fclose(data);
+    //data->flush();
+    data->close();
+  }
 
   uint64_t elapsed_second = (uint64_t)(time(NULL) - start_time), elapsed_minute = elapsed_second / 60, elapsed_hour = elapsed_minute / 60;
   elapsed_minute -= elapsed_hour * 60;
