@@ -1,5 +1,4 @@
 import numpy as np
-#import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -19,43 +18,37 @@ bp_model_packet = np.dtype([
 SIZE_OF_PACKET = 8 * len(bp_model_packet)
 
 def read_data(filename):
-  print("Loading in data from the file: {0}...".format(filename))
+  print("Loading in data from the file: \"{0}\"...".format(filename))
 
   with open(filename, "rb") as file:
       b = file.read()
   
-  '''
-  #print("number of packets {0}".format(len(b)/SIZE_OF_PACKET))
-
-  #num_of_packets = int(len(b) / SIZE_OF_PACKET) - 1
-
-  data = np.zeros(( num_of_packets, 4), dtype=np.uint64 )
-
-  for i in range(0, num_of_packets):
-    ip, b_type, b_addr, b_pred = struct.unpack_from("QBQB", b, offset = i * SIZE_OF_PACKET)
-
-    data[i, 0] = ip
-    data[i, 1] = b_type
-    data[i, 2] = b_addr
-    data[i, 3] = b_pred
-
-    print(data[i])
-  '''
+  raw_data = np.frombuffer(b, dtype=bp_model_packet)
+  global Np
+  Np = len(raw_data)
   
-  np_data = np.frombuffer(b, dtype=bp_model_packet)
-  
-  data = np.zeros((len(np_data), 1, 4), dtype=np.uint64 )
+  data = np.zeros((len(raw_data), 1, 4), dtype=np.uint64 )
 
-  #print("SHAPE!!!", data.shape, np_data.shape)
+  #print("SHAPE!!!", data.shape, raw_data.shape)
 
   # Convert the tuple array into something usable
-  for i in range(len(np_data)):
+  for i in range(Np):
       for j in range(4):
-          data[i, 0, j] = np_data[i][j]
+          data[i, 0, j] = raw_data[i][j]
 
   #data = data.reshape((len(data), 1, 4))
 
-  return data[:, :, 0:3], data[:, :, 3]
+  norm_data = np.zeros((Np, 1, 4), dtype=np.double )
+  #for i in range(4) : norm_data[:, :, i] = tf.nn.softmax(data[:, :, i])
+
+  print("Normalising data...")
+  for i in range(Np): 
+    norm_data[i][0][0] = float(data[i][0][0]) / float(2**64 - 1)
+    norm_data[i][0][1] = float(data[i][0][1]) / float(7)
+    norm_data[i][0][2] = float(data[i][0][2]) / float(2**64 - 1)
+    norm_data[i][0][3] = float(data[i][0][3])
+
+  return norm_data[:, :, 0:3], norm_data[:, :, 3]
    
 
 def loss(target_y, predicted_y):
@@ -108,7 +101,7 @@ class Model(tf.keras.Model):
                                         padding="valid",
                                         data_format="channels_last")
         
-        # Reshape - (64, 1, 4) --> (1, 256)
+        # Reshape - (1, 64, 4) --> (1, 1, 256)
         self.reshape = layers.Reshape((1, 256),
                                       input_shape=(1, 4, 64))
         
@@ -124,36 +117,22 @@ class Model(tf.keras.Model):
 
     # The forward pass
     def call(self, x):
-      print("##### - Starting forward pass... - #####")
-      print("input", x.shape)
-      x = self.expan_fc1(x)
-      print("expan_fc1", x.shape)
-      x = self.reshape1(x)
-      print("reshape1", x.shape)
-      x = self.conv1(x)
-      print("conv1", x.shape)
-        
-        
-      x = self.pool1(x)
-      print("pool1", x.shape)
+      print("##### - Starting forward pass... - #####"); print("input", x.shape)
+      x = self.expan_fc1(x); print("expan_fc1", x.shape)
+      x = self.reshape1(x); print("reshape1", x.shape)
       
-      x = self.conv2(x)
-      print("conv2", x.shape)
+      x = self.conv1(x); print("conv1", x.shape)        
+      x = self.pool1(x); print("pool1", x.shape)
       
-      x = self.pool2(x)
-      print("pool2", x.shape)
+      x = self.conv2(x); print("conv2", x.shape)
+      x = self.pool2(x); print("pool2", x.shape)
 
-      x = self.reshape(x)
-      print("reshape", x.shape)
-      
+      x = self.reshape(x); print("reshape", x.shape)      
 
-      x = self.comp_fc1(x)
-      print("comp_fc1", x.shape)
-      x = self.comp_fc2(x)
-      print("comp_fc2", x.shape, x)
+      x = self.comp_fc1(x); print("comp_fc1", x.shape)
+      x = self.comp_fc2(x); print("comp_fc2", x.shape, x)
       
       print("##### - Ending forward pass... - #####")
-      
       return x
 
 
@@ -161,12 +140,11 @@ class Model(tf.keras.Model):
 
 x_train, y_train = read_data(sys.argv[1])
 
-print("shape", x_train.shape)
+#print("shape", x_train.shape)
 
 model = Model()
-model.compile(optimizer="Adam", loss="mse", metrics=["mae"])
-model.build(input_shape=(1, 3))
-model.summary()
+#model.compile(optimizer="Adam", loss="mse", metrics=["mae"])
+
 
 model.compile(
     # By default, fit() uses tf.function().  You can
@@ -174,12 +152,17 @@ model.compile(
     run_eagerly=False,
 
     # Using a built-in optimizer, configuring as an object
-    optimizer=tf.keras.optimizers.SGD(learning_rate=0.1),
+    optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
 
     # Keras comes with built-in MSE error
     # However, you could use the loss function
     # defined above
-    loss=tf.keras.losses.mean_squared_error,
+
+    #loss=tf.keras.losses.mean_squared_error,
+    loss=tf.keras.losses.MeanSquaredError()
 )
 
-model.fit(x_train, y_train, epochs=10, batch_size=1, shuffle=False)
+model.build(input_shape=(1, 3))
+model.summary()
+
+model.fit(x_train, y_train, epochs=10, batch_size=Np, shuffle=False)
