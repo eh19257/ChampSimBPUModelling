@@ -16,7 +16,7 @@ bp_model_packet = np.dtype([
         ("branch_prediciton", 'u8')
     ])
 
-SIZE_OF_PACKET = 8*4
+SIZE_OF_PACKET = 8 * len(bp_model_packet)
 
 def read_data(filename):
   print("Loading in data from the file: {0}...".format(filename))
@@ -46,7 +46,7 @@ def read_data(filename):
   
   data = np.zeros((len(np_data), 1, 4), dtype=np.uint64 )
 
-  print("SHAPE!!!", data.shape, np_data.shape)
+  #print("SHAPE!!!", data.shape, np_data.shape)
 
   # Convert the tuple array into something usable
   for i in range(len(np_data)):
