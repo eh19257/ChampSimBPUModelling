@@ -18,37 +18,29 @@ bp_model_packet = np.dtype([
 SIZE_OF_PACKET = 8 * len(bp_model_packet)
 
 def read_data(filename):
-  print("Loading in data from the file: \"{0}\"...".format(filename))
+  print("Loading and normalising data from the file: \"{0}\"...".format(filename))
 
   with open(filename, "rb") as file:
       b = file.read()
   
   raw_data = np.frombuffer(b, dtype=bp_model_packet)
+
   global Np
   Np = len(raw_data)
   
-  data = np.zeros((len(raw_data), 1, 4), dtype=np.uint64 )
-
-  #print("SHAPE!!!", data.shape, raw_data.shape)
+  data = np.zeros((Np, 1, 4), dtype=np.uint64 )
 
   # Convert the tuple array into something usable
   for i in range(Np):
-      for j in range(4):
-          data[i, 0, j] = raw_data[i][j]
+    data[i, 0, 0] = float(raw_data[i][0]) / float(2**64 - 1)
+    data[i, 0, 1] = float(raw_data[i][1]) / float(7)
+    data[i, 0, 2] = float(raw_data[i][2]) / float(2**64 - 1)
+    data[i, 0, 3] = float(raw_data[i][3])
 
-  #data = data.reshape((len(data), 1, 4))
+  x_out = data[:, :, 0:3]
+  y_out = data[:, :, 3].reshape((Np, 1, 1))
 
-  norm_data = np.zeros((Np, 1, 4), dtype=np.double )
-  #for i in range(4) : norm_data[:, :, i] = tf.nn.softmax(data[:, :, i])
-
-  print("Normalising data...")
-  for i in range(Np): 
-    norm_data[i][0][0] = float(data[i][0][0]) / float(2**64 - 1)
-    norm_data[i][0][1] = float(data[i][0][1]) / float(7)
-    norm_data[i][0][2] = float(data[i][0][2]) / float(2**64 - 1)
-    norm_data[i][0][3] = float(data[i][0][3])
-
-  return norm_data[:, :, 0:3], norm_data[:, :, 3]
+  return x_out[0:1000], y_out[0:1000]
    
 
 def loss(target_y, predicted_y):
@@ -72,8 +64,7 @@ class Model(tf.keras.Model):
         self.reshape1 = layers.Reshape((16, 1),
                                       input_shape=(1, 16))
 
-        # Conv layer 1 - consists of 32x (1x16) kernels to form an output of the shape (32, 1, 16)
-        
+        # Conv layer 1 - consists of 32x (1x16) kernels to form an output of the shape (1, 32, 16)        
         self.conv1 = layers.Conv1D(32, 
                                   3,
                                   strides=1,
@@ -102,7 +93,7 @@ class Model(tf.keras.Model):
                                         data_format="channels_last")
         
         # Reshape - (1, 64, 4) --> (1, 1, 256)
-        self.reshape = layers.Reshape((1, 256),
+        self.reshape2 = layers.Reshape((1, 256),
                                       input_shape=(1, 4, 64))
         
         # Compression FC layer 1 - compresses the input from(1, 1, 256) down to (1, 1, 16)
@@ -112,7 +103,6 @@ class Model(tf.keras.Model):
         # Compression FC layer 2 - compresses the input from(1, 1, 16) down to (1, 1, 1)
         self.comp_fc2 = layers.Dense( units=1,
                                       activation=ACT_FUNC)
-        
         
 
     # The forward pass
@@ -127,7 +117,7 @@ class Model(tf.keras.Model):
       x = self.conv2(x); print("conv2", x.shape)
       x = self.pool2(x); print("pool2", x.shape)
 
-      x = self.reshape(x); print("reshape", x.shape)      
+      x = self.reshape2(x); print("reshape2", x.shape)      
 
       x = self.comp_fc1(x); print("comp_fc1", x.shape)
       x = self.comp_fc2(x); print("comp_fc2", x.shape, x)
@@ -140,7 +130,11 @@ class Model(tf.keras.Model):
 
 x_train, y_train = read_data(sys.argv[1])
 
-#print("shape", x_train.shape)
+
+print("shape", x_train.shape)
+print("Single output", x_train[0].shape)
+print("shape", y_train.shape)
+print("Single output", y_train[0].shape)
 
 model = Model()
 #model.compile(optimizer="Adam", loss="mse", metrics=["mae"])
@@ -165,4 +159,4 @@ model.compile(
 model.build(input_shape=(1, 3))
 model.summary()
 
-model.fit(x_train, y_train, epochs=10, batch_size=Np, shuffle=False)
+model.fit(x_train, y_train, epochs=10, batch_size=1, shuffle=False)
