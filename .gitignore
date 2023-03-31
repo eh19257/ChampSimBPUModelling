@@ -15,6 +15,7 @@ obj/
 
 tracer/pin/obj-intel64/
 tracer/pin/pin-3.26-98690-g1fc9d60e6-gcc-linux
+benchmarks/
 
 
 
