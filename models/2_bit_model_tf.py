@@ -40,7 +40,7 @@ def read_data(filename):
   x_out = data[:, :, 0:3]
   y_out = data[:, :, 3].reshape((Np, 1, 1))
 
-  return x_out[0:1000], y_out[0:1000]
+  return x_out[0:10000], y_out[0:10000]
    
 
 def loss(target_y, predicted_y):
@@ -146,14 +146,15 @@ model.compile(
     run_eagerly=False,
 
     # Using a built-in optimizer, configuring as an object
-    optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
+    optimizer=tf.keras.optimizers.SGD(learning_rate=0.2),
 
     # Keras comes with built-in MSE error
     # However, you could use the loss function
     # defined above
 
     #loss=tf.keras.losses.mean_squared_error,
-    loss=tf.keras.losses.MeanSquaredError()
+    #loss=tf.keras.losses.MeanSquaredError()
+    loss=tf.keras.losses.BinaryCrossentropy(from_logits=True)
 )
 
 model.build(input_shape=(1, 3))
