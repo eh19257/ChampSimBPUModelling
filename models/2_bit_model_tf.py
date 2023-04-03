@@ -29,6 +29,10 @@ def read_data(filename):
   Np = len(raw_data)
   
   data = np.zeros((Np, 1, 4), dtype=np.double )
+  hot_ones = np.zeros((Np, 1, 2), dtype=np.double)
+
+  PRED   = np.array([1, 0], dtype=np.double)
+  N_PRED = np.array([0, 1], dtype=np.double)
 
   # Convert the tuple array into something usable
   for i in range(Np):
@@ -42,11 +46,15 @@ def read_data(filename):
     data[i, 0, 0] = float(raw_data[i][0]) / float(2**64 - 1)
     data[i, 0, 1] = float(raw_data[i][1]) / float(7)
     data[i, 0, 2] = float(raw_data[i][2]) / float(2**64 - 1)
-    data[i, 0, 3] = float(raw_data[i][3])
+    #data[i, 0, 3] = float(raw_data[i][3])
+
+    if (raw_data[i][3] == 1) : hot_ones[i, 0] = PRED
+    else                     : hot_ones[i, 0] = N_PRED
     
 
   x_out = data[:, :, 0:3]
-  y_out = data[:, :, 3]#.reshape((Np, 1, 1))
+  y_out = hot_ones#data[:, :, 3]#.reshape((Np, 1, 1))
+
 
   return x_out, y_out
   #return data[:, :, 0:3], data[:, :, 3].reshape((Np, 1, 1))
@@ -107,11 +115,23 @@ class Model(tf.keras.Model):
           self.comp_fc2 = layers.Dense( units=1,
                                         activation=ACT_FUNC)
         '''
-        self.reshape = layers.Reshape((1, 3), input_shape=(1, 3))
-        self.rnn = layers.SimpleRNN(16, input_shape=(1, 3), activation=ACT_FUNC)
+        self.expan_fc1 = layers.Dense(units=16,
+                                      activation=ACT_FUNC)
 
-        self.FC = layers.Dense( units=1,
-                    activation=ACT_FUNC)
+        self.reshape = layers.Reshape((16, 1),
+                                      input_shape=(1, 16))
+
+        self.rnn = layers.SimpleRNN(256,
+                                    input_shape=(16, 1),
+                                    activation=ACT_FUNC)
+
+        # Compression FC layer 1 - compresses the input from(1, 1, 256) down to (1, 1, 16)
+        self.comp_fc1 = layers.Dense(units=16,
+                                    activation=ACT_FUNC)
+        
+        # Compression FC layer 2 - compresses the input from(1, 1, 16) down to (1, 1, 1)
+        self.comp_fc2 = layers.Dense(units=2,
+                                    activation=ACT_FUNC)
 
     # The forward pass
     def call(self, x):
@@ -131,9 +151,13 @@ class Model(tf.keras.Model):
         x = self.comp_fc1(x); print("comp_fc1", x.shape)
         x = self.comp_fc2(x); print("comp_fc2", x.shape, x)
       '''
+      
+      x = self.expan_fc1(x); print("expan_fc1", x.shape)
       x = self.reshape(x)
       x = self.rnn(x); print("rnn", x.shape)
-      x = self.FC(x); print("comp_fc", x.shape)
+      x = self.comp_fc1(x); print("comp_fc1", x.shape)
+      x = self.comp_fc2(x); print("comp_fc2", x.shape)
+      #x = self.FC(x); print("comp_fc", x.shape)
       print("##### - Ending forward pass... - #####")
       return x
 
@@ -158,7 +182,7 @@ model.compile(
     run_eagerly=False,
 
     # Using a built-in optimizer, configuring as an object
-    optimizer=tf.keras.optimizers.SGD(learning_rate=0.001),
+    optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
 
     # Keras comes with built-in MSE error
     # However, you could use the loss function
@@ -172,7 +196,7 @@ model.compile(
 model.build(input_shape=(1, 3))
 model.summary()
 
-model.fit(x_train, y_train, epochs=10, batch_size=10000, shuffle=False)
+model.fit(x_train, y_train, epochs=3, batch_size=100, shuffle=False)
 
 
 branch_test =  np.array([[[140084140304547/(2**64 - 1), 1/7, 140084140304566/(2**64 - 1)]]])
