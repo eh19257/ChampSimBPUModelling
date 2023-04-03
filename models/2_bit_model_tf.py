@@ -45,9 +45,9 @@ def read_data(filename):
     #data[i, 0, 3] = float(raw_data[i][3])
 
     if (raw_data[i][3] == 1): 
-      hot_ones[i, 0] = np.array([1, -1], dtype=np.double)
+      hot_ones[i, 0] = np.array([1, 0], dtype=np.double)
     else:
-      hot_ones[i, 0] = np.array([-1, 1], dtype=np.double)
+      hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
     
 
   x_out = data[:, :, 0:3]
@@ -113,7 +113,6 @@ class Model(tf.keras.Model):
           self.comp_fc2 = layers.Dense( units=1,
                                         activation=ACT_FUNC)
         '''
-        '''
         self.expan_fc1 = layers.Dense(units=16,
                                       activation=ACT_FUNC)
 
@@ -121,7 +120,7 @@ class Model(tf.keras.Model):
                                         input_shape=(1, 16))
 
         # Conv layer 1 - consists of 32x (1x16) kernels to form an output of the shape (1, 32, 16)        
-        self.conv1 = layers.Conv1D(64, 
+        self.conv1 = layers.Conv1D(32, 
                                   3,
                                   strides=1,
                                   padding="same",
@@ -135,7 +134,7 @@ class Model(tf.keras.Model):
                                         data_format="channels_last")
         
         # Conv layer 2 - consists of 64x (32, 3) filters/kernels to form an output of the shape (64, 1, 8)
-        self.conv2 = layers.Conv1D(128,
+        self.conv2 = layers.Conv1D(64,
                                   3,
                                   strides=1,
                                   padding="same",
@@ -149,10 +148,10 @@ class Model(tf.keras.Model):
                                         data_format="channels_last")
         
         # Reshape - (1, 64, 4) --> (1, 1, 256)
-        self.reshape2 = layers.Reshape((1, 512),
+        self.reshape2 = layers.Reshape((1, 256),
                                       input_shape=(1, 4, 64))
 
-        self.rnn = layers.SimpleRNN(512,
+        self.rnn = layers.SimpleRNN(256,
                                     input_shape=(256, 1),
                                     activation=ACT_FUNC)
 
@@ -161,24 +160,25 @@ class Model(tf.keras.Model):
         #                            activation=ACT_FUNC)
         
         # Compression FC layer 2 - compresses the input from(1, 1, 16) down to (1, 1, 1)
-        self.comp_fc2 = layers.Dense(units=32,
+        self.comp_fc2 = layers.Dense(units=16,
                                     activation=ACT_FUNC)
 
         # Compression FC layer 2 - compresses the input from(1, 1, 16) down to (1, 1, 1)
         self.comp_fc3 = layers.Dense(units=2,
                                     activation=tf.keras.activations.softmax)
         '''
-        self.fc1 = layers.Dense(units=16,
-                                activation=ACT_FUNC)
+          self.fc1 = layers.Dense(units=16,
+                                  activation=ACT_FUNC)
 
-        self.fc2 = layers.Dense(units=32,
-                                activation=ACT_FUNC)
-        
-        self.fc3 = layers.Dense(units=16,
-                                activation=ACT_FUNC)
-        
-        self.fc4 = layers.Dense(units=2,
-                                activation=ACT_FUNC)
+          self.fc2 = layers.Dense(units=32,
+                                  activation=ACT_FUNC)
+          
+          self.fc3 = layers.Dense(units=16,
+                                  activation=ACT_FUNC)
+          
+          self.fc4 = layers.Dense(units=2,
+                                  activation=ACT_FUNC)
+        '''
 
     # The forward pass
     def call(self, x):
@@ -198,7 +198,7 @@ class Model(tf.keras.Model):
         x = self.comp_fc1(x); print("comp_fc1", x.shape)
         x = self.comp_fc2(x); print("comp_fc2", x.shape, x)
       '''
-      '''
+      
       x = self.expan_fc1(x); print("expan_fc1", x.shape)
       x = self.reshape1(x); print("reshape1", x.shape)
       
@@ -216,11 +216,11 @@ class Model(tf.keras.Model):
       x = self.comp_fc2(x); print("comp_fc2", x.shape)
       x = self.comp_fc3(x); print("comp_fc3", x.shape)
       '''
-      x = self.fc1(x)
-      x = self.fc2(x)
-      x = self.fc3(x)
-      x = self.fc4(x)
-
+        x = self.fc1(x)
+        x = self.fc2(x)
+        x = self.fc3(x)
+        x = self.fc4(x)
+      '''
       #x = tf.keras.activations.softmax(x)
       print("##### - Ending forward pass... - #####")
       return x
@@ -230,7 +230,7 @@ class Model(tf.keras.Model):
 
 x_train, y_train = read_data(sys.argv[1])
 
-#x_test, y_test   = read_data(sys.argv[2])
+x_test, y_test   = read_data(sys.argv[2])
 
 '''
 print("shape", x_train.shape)
@@ -265,10 +265,10 @@ model.summary()
 
 model.fit(x_train,
           y_train, 
-          epochs=3,
+          epochs=10,
           batch_size=1000,
-          shuffle=False)
-          #validation_data=(x_test, y_test))
+          shuffle=False,
+          validation_data=(x_test, y_test))
 
 
 branch_test =  np.array([[[140084140304547 * 2/(2**64 - 1), 1 * 2/7, 140084140304566 * 2/(2**64 - 1)]]], dtype=np.double) - 1
