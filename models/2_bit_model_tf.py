@@ -32,22 +32,26 @@ def read_data(filename):
 
   # Convert the tuple array into something usable
   for i in range(Np):
-    '''
-    data[i, 0, 0] = raw_data[i][0]
+    
+    data[i, 0, 0] = raw_data[i][0]# / float(2**8 - 1)
     data[i, 0, 1] = raw_data[i][1]
-    data[i, 0, 2] = raw_data[i][2]
-    data[i, 0, 3] = raw_data[i][3]
+    data[i, 0, 2] = raw_data[i][2]# / float(2**8 - 1)
+    #data[i, 0, 3] = raw_data[i][3]
 
     '''
-    data[i, 0, 0] = (float(raw_data[i][0] * 2) / float(2**64 - 1)) - 1
+    data[i, 0, 0] = (float(raw_data[i][0] * 2) / float(2**16 - 1)) - 1
     data[i, 0, 1] = (float(raw_data[i][1] * 2) / float(7)) - 1
-    data[i, 0, 2] = (float(raw_data[i][2] * 2) / float(2**64 - 1)) - 1
+    data[i, 0, 2] = (float(raw_data[i][2] * 2) / float(2**16 - 1)) - 1
     #data[i, 0, 3] = float(raw_data[i][3])
-
+    '''
     if (raw_data[i][3] == 1): 
       hot_ones[i, 0] = np.array([1, 0], dtype=np.double)
     else:
       hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
+  
+  data[:, :, 0] = ( ( data[:, :, 0] % 16 ) * 2 ) / float( 2**16 - 1) - 1
+  data[:, :, 1] = ( ( data[:, :, 1] % 16 ) * 2 ) / float( 7        ) - 1 
+  data[:, :, 2] = ( ( data[:, :, 2] % 16 ) * 2 ) / float( 2**16 - 1) - 1
     
 
   x_out = data[:, :, 0:3]
@@ -230,7 +234,7 @@ class Model(tf.keras.Model):
 
 x_train, y_train = read_data(sys.argv[1])
 
-x_test, y_test   = read_data(sys.argv[2])
+#x_test, y_test   = read_data(sys.argv[2])
 
 '''
 print("shape", x_train.shape)
@@ -248,7 +252,7 @@ model.compile(
     run_eagerly=False,
 
     # Using a built-in optimizer, configuring as an object
-    optimizer=tf.keras.optimizers.SGD(learning_rate=0.1),
+    optimizer=tf.keras.optimizers.SGD(learning_rate=0.5),
 
     metrics=["accuracy"],
     # Keras comes with built-in MSE error
@@ -267,8 +271,9 @@ model.fit(x_train,
           y_train, 
           epochs=10,
           batch_size=1000,
-          shuffle=False,
-          validation_data=(x_test, y_test))
+          shuffle=False
+          #validation_data=(x_test, y_test)
+)
 
 
 branch_test =  np.array([[[140084140304547 * 2/(2**64 - 1), 1 * 2/7, 140084140304566 * 2/(2**64 - 1)]]], dtype=np.double) - 1
