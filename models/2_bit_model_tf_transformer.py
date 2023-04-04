@@ -43,9 +43,9 @@ def read_data(filename):
         else:
             hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
 
-    data[:, :, 0] = (data[:, :, 0] * 2 ) / float(2**20 - 1) - 1
-    data[:, :, 1] = (data[:, :, 1] * 2 ) / float(7    ) - 1 
-    data[:, :, 2] = (data[:, :, 2] * 2 ) / float(2**20 - 1) - 1
+    data[:, :, 0] = (data[:, :, 0] ) / float(2**20 - 1) #- 1
+    data[:, :, 1] = (data[:, :, 1] ) / float(7    )     #- 1 
+    data[:, :, 2] = (data[:, :, 2] ) / float(2**20 - 1) #- 1
 
     x_out = data[:, :, 0:3]
     y_out = hot_ones#data[:, :, 3]#.reshape((Np, 1, 1))
@@ -115,7 +115,7 @@ class CrossAttention(BaseAttention):
                                                     value=context,
                                                     return_attention_scores=True
         )
-        self.last_attn_scores = attn_scores
+        self.last_attn_scores = attention_scores
         
         # Add & Norm Layers
         x = self.add([x, attention_output])
@@ -145,7 +145,7 @@ class GlobalSelfAttention(BaseAttention):
 # Found at the input side of he decoder, takes in information from previous decoder inputs
 class CausalSelfAttention(BaseAttention):
     #def __init__(self):
-    #    super().__init__()
+    #    super(self).__init__()
     
     def call(self, x):
         # "Feed Forward" on the attention. Here we take information from the entire input to the encoder
@@ -153,8 +153,8 @@ class CausalSelfAttention(BaseAttention):
         # from inputs that were inputted before the current on i.e. that caused the current input.
         attention_output = self.mha(query=x,
                                     key=x,
-                                    value=x,
-                                    use_causal_mask=True
+                                    value=x
+                                    #use_causal_mask = True
         )
         
         # Add & Norm Layers
@@ -215,7 +215,7 @@ class Encoder(layers.Layer):
         self.num_layers = num_layers
         
         self.pos_embedding = PositionalEmbedding(vocab_size=vocab_size,
-                                                d_model=d_model
+                                                d_dims=d_dims
         )
 
         self.dropout = layers.Dropout(dropout_rate)
@@ -274,12 +274,12 @@ class Decoder(layers.Layer):
         self.num_layers = num_layers
 
         self.pos_embedding = PositionalEmbedding(vocab_size=vocab_size,
-                                                d_model=d_model
+                                                d_dims=d_dims
         )
 
         self.dropout = layers.Dropout(dropout_rate)
 
-        self.dec_layer = [
+        self.dec_layers = [
             DecoderLayer(d_dims=d_dims,
                         num_heads=num_heads,
                         ff_fc=ff_fc,
@@ -295,7 +295,7 @@ class Decoder(layers.Layer):
         x = self.dropout(x)
 
         for i in range(self.num_layers):
-            x = self.dec_layer[i](x, context)
+            x = self.dec_layers[i](x, context)
 
         self.last_attn_scores = self.dec_layers[-1].last_attn_scores
         
@@ -320,7 +320,7 @@ class Transformer(keras.Model):
                             vocab_size=target_vocab_size,
                             dropout_rate=dropout_rate)
         
-        self.final = layers.Dense(target_size)
+        self.final = layers.Dense(target_vocab_size)
     
 
     def call(self, inputs):
@@ -349,28 +349,31 @@ class Transformer(keras.Model):
 x_train, y_train = read_data(sys.argv[1])
 
 num_layers = 4
-d_dims = 128
-ff_fc = 512
+d_dims = 64
+ff_fc = 256
 num_heads = 8
 dropout_rate = 0.1
 BATCH_SIZE = 10
 
-for i in range(Np):
-    print(x_train[i], y_train[i])
+#for i in range(Np):
+#    print(x_train[i], y_train[i])
 
 
-'''
+#transformer.build(input_shape=(1, 3))
+foo = x_train[0:256]
+bar = x_train[256:256+256]
+
 transformer = Transformer(
     num_layers=num_layers,
     d_dims=d_dims,
     num_heads=num_heads,
     ff_fc=ff_fc,
-    input_vocab_size=BATCH_SIZE,
-    target_vocab_size=tokenizers.en.get_vocab_size().numpy(),
+    input_vocab_size=256,
+    target_vocab_size=1,
     dropout_rate=dropout_rate)
 
-#transformer.build(input_shape=(1, 3))
-transformer((np.zeros(x_train.shape), x_train))
+
+
+print("BLANK AND EMPTY:", transformer((foo, bar)))
 transformer.summary()
 # usage transformer((context, inputs))
-'''
