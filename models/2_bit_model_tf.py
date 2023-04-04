@@ -252,7 +252,7 @@ model.compile(
     run_eagerly=False,
 
     # Using a built-in optimizer, configuring as an object
-    optimizer=tf.keras.optimizers.SGD(learning_rate=0.1),
+    optimizer=tf.keras.optimizers.SGD(learning_rate=0.05),
 
     metrics=["accuracy"],
     # Keras comes with built-in MSE error
