@@ -49,9 +49,9 @@ def read_data(filename):
     else:
       hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
   
-  data[:, :, 0] = ( ( data[:, :, 0] % 16 ) * 2 ) / float( 2**16 - 1) - 1
-  data[:, :, 1] = ( ( data[:, :, 1] % 16 ) * 2 ) / float( 7        ) - 1 
-  data[:, :, 2] = ( ( data[:, :, 2] % 16 ) * 2 ) / float( 2**16 - 1) - 1
+  data[:, :, 0] = ( ( data[:, :, 0] % 2**20 ) * 2 ) / float( 2**20 - 1) - 1
+  data[:, :, 1] = ( ( data[:, :, 1] % 2**20 ) * 2 ) / float( 7        ) - 1 
+  data[:, :, 2] = ( ( data[:, :, 2] % 2**20 ) * 2 ) / float( 2**20 - 1) - 1
     
 
   x_out = data[:, :, 0:3]
@@ -252,7 +252,7 @@ model.compile(
     run_eagerly=False,
 
     # Using a built-in optimizer, configuring as an object
-    optimizer=tf.keras.optimizers.SGD(learning_rate=0.5),
+    optimizer=tf.keras.optimizers.SGD(learning_rate=0.1),
 
     metrics=["accuracy"],
     # Keras comes with built-in MSE error

@@ -33,26 +33,26 @@ def read_data(filename):
 
     # Convert the tuple array into something usable
     for i in range(Np):
-        data[i, 0, 0] = raw_data[i][0]
-        data[i, 0, 1] = raw_data[i][1] / 7
-        data[i, 0, 2] = raw_data[i][2] / 2**64 - 1
+        data[i, 0, 0] = raw_data[i][0] % 2**20
+        data[i, 0, 1] = raw_data[i][1]
+        data[i, 0, 2] = raw_data[i][2] % 2**20
         #data[i, 0, 3] = float(raw_data[i][3])
 
-    if (raw_data[i][3] == 1): 
-        hot_ones[i, 0] = np.array([1, 0], dtype=np.double)
-    else:
-        hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
+        if (raw_data[i][3] == 1): 
+            hot_ones[i, 0] = np.array([1, 0], dtype=np.double)
+        else:
+            hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
 
-    data[:, :, 0] = (data[:, :, 0] * 2 ) / float(2**64) - 1
+    data[:, :, 0] = (data[:, :, 0] * 2 ) / float(2**20 - 1) - 1
     data[:, :, 1] = (data[:, :, 1] * 2 ) / float(7    ) - 1 
-    data[:, :, 2] = (data[:, :, 2] * 2 ) / float(2**64) - 1
+    data[:, :, 2] = (data[:, :, 2] * 2 ) / float(2**20 - 1) - 1
 
     x_out = data[:, :, 0:3]
     y_out = hot_ones#data[:, :, 3]#.reshape((Np, 1, 1))
 
-    dataset = tf.data.Dataset.from_tensor_slices((x_out, y_out))
+    #dataset = tf.data.Dataset.from_tensor_slices((x_out, y_out))
 
-    return dataset
+    return x_out, y_out
     #return data[:, :, 0:3], data[:, :, 3].reshape((Np, 1, 1))
 
 
@@ -207,7 +207,6 @@ class EncoderLayer(layers.Layer):
 
         return x
 
-
 class Encoder(layers.Layer):
     def __init__(self, *, num_layers, d_dims, num_heads, ff_fc, vocab_size=None, dropout_rate=0.1):
         super().__init__()
@@ -238,7 +237,6 @@ class Encoder(layers.Layer):
         return x
 
 
-
 class DecoderLayer(layers.Layer):
     def __init__(self, *, d_dims, num_heads, ff_fc, dropout_rate):
         super(DecoderLayer, self).__init__()
@@ -267,7 +265,6 @@ class DecoderLayer(layers.Layer):
 
         x = self.ff(x)
         return x
-
 
 class Decoder(layers.Layer):
     def __init__(self, *, num_layers, d_dims, num_heads, ff_fc, vocab_size=None, dropout_rate=0.1):
@@ -325,6 +322,7 @@ class Transformer(keras.Model):
         
         self.final = layers.Dense(target_size)
     
+
     def call(self, inputs):
         context, x = inputs
 
@@ -348,7 +346,7 @@ class Transformer(keras.Model):
 
 ###################################################################################################
 
-train_dataset = read_data(sys.argv[1])
+x_train, y_train = read_data(sys.argv[1])
 
 num_layers = 4
 d_dims = 128
@@ -357,8 +355,8 @@ num_heads = 8
 dropout_rate = 0.1
 BATCH_SIZE = 10
 
-for i in train_dataset:
-    print(i)
+for i in range(Np):
+    print(x_train[i], y_train[i])
 
 
 '''
