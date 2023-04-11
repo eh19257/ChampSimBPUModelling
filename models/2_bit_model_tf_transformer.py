@@ -10,6 +10,7 @@ bp_model_packet = np.dtype([
         ("ip", '<u8'),
         ("branch_type", '<u8'),
         ("branch_addr", '<u8'),
+        ("actual_branch_behaviour", '<u8'),
         ("branch_prediciton", '<u8')
     ])
 
@@ -33,26 +34,27 @@ def read_data(filename):
 
     # Convert the tuple array into something usable
     for i in range(Np):
-        data[i, 0, 0] = raw_data[i][0] % 2**20
-        data[i, 0, 1] = raw_data[i][1]
-        data[i, 0, 2] = raw_data[i][2] % 2**20
-        #data[i, 0, 3] = float(raw_data[i][3])
+        data[i, 0, 0] = float(raw_data[i][0] % 2**20)
+        data[i, 0, 1] = float(raw_data[i][1])
+        data[i, 0, 2] = float(raw_data[i][2] % 2**20)
+        data[i, 0, 3] = float(raw_data[i][3])
 
-        if (raw_data[i][3] == 1): 
+        if (raw_data[i][4] == 1): 
             hot_ones[i, 0] = np.array([1, 0], dtype=np.double)
         else:
             hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
 
     data[:, :, 0] = (data[:, :, 0] ) / float(2**20 - 1) #- 1
-    data[:, :, 1] = (data[:, :, 1] ) / float(7    )     #- 1 
+    data[:, :, 1] = (data[:, :, 1] ) / float(7        ) #- 1 
     data[:, :, 2] = (data[:, :, 2] ) / float(2**20 - 1) #- 1
+    #data[:, :, 3] = (data[:, :, 3] ) / float(1        )
 
-    x_out = data[:, :, 0:3]
+    x_out = data#[:, :, 0:3]
     y_out = hot_ones#data[:, :, 3]#.reshape((Np, 1, 1))
 
     #dataset = tf.data.Dataset.from_tensor_slices((x_out, y_out))
 
-    return x_out, y_out
+    return x_out[0:1000], y_out[0:1000]
     #return data[:, :, 0:3], data[:, :, 3].reshape((Np, 1, 1))
 
 
@@ -65,11 +67,13 @@ def positional_encoding(length, depth):
 
   angle_rates = 1 / (10000**depths)         # (1, depth)
   angle_rads = positions * angle_rates      # (pos, depth)
+  print("angle_rads:", angle_rads.shape)
 
   pos_encoding = np.concatenate(
       [np.sin(angle_rads), np.cos(angle_rads)],
       axis=-1) 
 
+  print("pos_encoding.shape:", pos_encoding.shape)
   return tf.cast(pos_encoding, dtype=tf.float32)
 
 
@@ -78,17 +82,27 @@ class PositionalEmbedding(tf.keras.layers.Layer):
   def __init__(self, vocab_size, d_dims):
     super().__init__()
     self.d_dims = d_dims
-    self.embedding = tf.keras.layers.Embedding(vocab_size, d_dims, mask_zero=True) 
-    self.pos_encoding = positional_encoding(length=2048, depth=d_dims)
+    #self.embedding = tf.keras.layers.Embedding(vocab_size, d_dims, mask_zero=True)
+    self.expand = layers.Dense(d_dims)
+    self.pos_encoding = positional_encoding(length=2048, depth=d_dims)#depth=4)
 
-  def compute_mask(self, *args, **kwargs):
-    return self.embedding.compute_mask(*args, **kwargs)
+  #def compute_mask(self, *args, **kwargs):
+    #return self.embedding.compute_mask(*args, **kwargs)
 
   def call(self, x):
-    length = tf.shape(x)[1]
-    x = self.embedding(x)
+    length = x.shape[1]#tf.shape(x)[1]
+    #x = self.embedding(x)
     # This factor sets the relative scale of the embedding and positonal_encoding.
     x *= tf.math.sqrt(tf.cast(self.d_dims, tf.float32))
+    #print("X SHAPE:", x.shape)
+    #print("POSENCODING SHAPE:", self.pos_encoding[tf.newaxis, :length, :].shape)
+    #print("POSENCODING:", self.pos_encoding.shape)
+    #foo = self.pos_encoding[tf.newaxis, :length, :]
+    #print("POSENCODING PART:", foo)
+    x = self.expand(x)
+    #x = x + self.pos_encoding[tf.newaxis, :length, :]
+    #tf.print("LENGTH:", length)
+
     x = x + self.pos_encoding[tf.newaxis, :length, :]
     return x
 
@@ -208,7 +222,7 @@ class EncoderLayer(layers.Layer):
         return x
 
 class Encoder(layers.Layer):
-    def __init__(self, *, num_layers, d_dims, num_heads, ff_fc, vocab_size=None, dropout_rate=0.1):
+    def __init__(self, *, num_layers, d_dims, num_heads, ff_fc, vocab_size, dropout_rate=0.1):
         super().__init__()
 
         self.d_dims     = d_dims
@@ -267,7 +281,7 @@ class DecoderLayer(layers.Layer):
         return x
 
 class Decoder(layers.Layer):
-    def __init__(self, *, num_layers, d_dims, num_heads, ff_fc, vocab_size=None, dropout_rate=0.1):
+    def __init__(self, *, num_layers, d_dims, num_heads, ff_fc, vocab_size, dropout_rate=0.1):
         super(Decoder, self).__init__()
 
         self.d_dims = d_dims
@@ -320,16 +334,33 @@ class Transformer(keras.Model):
                             vocab_size=target_vocab_size,
                             dropout_rate=dropout_rate)
         
-        self.final = layers.Dense(target_vocab_size)
+        self.reshape = layers.Reshape((1, 1, d_dims),
+                                      input_shape=(1, 1, 4, 256))
+
+        self.final_fc_1 = layers.Dense(int(d_dims / 32))
+
+        self.final_fc_2 = layers.Dense(target_vocab_size)
     
 
     def call(self, inputs):
         context, x = inputs
+        
+        print("CONTEXT:", context.shape); print("DECODER:", x.shape)
+        context = self.encoder(context); print("POST ENCODER:", context.shape)
 
-        context = self.encoder(context)
-        x = self.decoder(x, context)
+        x = self.decoder(x, context); print("POST DECODER:", x)
 
-        logits = self.final(x)
+        #logits = self.reshape(x)
+
+        print("PENULTIMATE SHAPE:", x.shape)
+
+        logits = self.final_fc_1(x)
+
+        print("ULTIMATE SHAPE:", logits.shape)
+
+        logits = self.final_fc_2(logits)
+
+        print("ULTIMATE ULTIMATE SHAPE:", logits.shape)
 
 
         # SOME TF thing - go and understand it!!!
@@ -346,34 +377,129 @@ class Transformer(keras.Model):
 
 ###################################################################################################
 
-x_train, y_train = read_data(sys.argv[1])
+class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+    def __init__(self, d_dims, warmup_steps=4000):
+        super().__init__()
+
+        self.d_dims = d_dims
+        self.d_dims = tf.cast(self.d_dims, tf.float32)
+
+        self.warmup_steps = warmup_steps
+
+    def __call__(self, step):
+        step = tf.cast(step, dtype=tf.float32)
+        arg1 = tf.math.rsqrt(step)
+        arg2 = step * (self.warmup_steps ** -1.5)
+
+        return tf.math.rsqrt(self.d_dims) * tf.math.minimum(arg1, arg2)
+
+
+def masked_loss(label, pred):
+  mask = label != 0
+  loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
+    from_logits=True, reduction='none')
+  loss = loss_object(label, pred)
+
+  mask = tf.cast(mask, dtype=loss.dtype)
+  loss *= mask
+
+  loss = tf.reduce_sum(loss)/tf.reduce_sum(mask)
+  return loss
+
+
+def masked_accuracy(label, pred):
+  pred = tf.argmax(pred, axis=2)
+  label = tf.cast(label, pred.dtype)
+  match = label == pred
+
+  mask = label != 0
+
+  match = match & mask
+
+  match = tf.cast(match, dtype=tf.float32)
+  mask = tf.cast(mask, dtype=tf.float32)
+  return tf.reduce_sum(match)/tf.reduce_sum(mask)
+
+
+def make_batches(x, y, h=128):
+    print("Formatting data into a history-table like structure...")
+    
+    Np = len(x)
+
+    enc   = np.zeros( ( Np - h, h, 4), dtype=np.double)
+    dec   = np.zeros( ( Np - h, 1, 4), dtype=np.double)
+
+    y_out = np.zeros( ( Np - h, 1, 2), dtype=np.double)#, h, 1, 1), dtype=np.double )
+    
+    for i in range(0, Np - h):
+        enc[i] = x[ i     : i + h     ].reshape((h, 4))
+        dec[i] = x[ i + h : i + h + 1 ].reshape((1, 4))
+
+        #print("enc", enc.shape)
+        #print("dec", dec.shape)
+
+        #x_out[ i ] = [enc, dec]
+        y_out[i] = y[ i ].reshape((1, 2))
+
+        #xs.append( (enc, dec) )
+        #ys.append( (y_out) )
+
+        #ds.append( ((enc, dec), y_out) )
+    
+    #ds = tf.data.Dataset.from_tensor_slices(ds)
+    return (enc, dec), y_out
+    #return tf.data.Dataset.from_tensor_slices(xs), tf.data.Dataset.from_tensor_slices(ys)#(tf.data.Dataset(enc), tf.data.Dataset(dec.)), tf.data.Dataset(y_out)
+
+###################################################################################################
 
 num_layers = 4
-d_dims = 64
+d_dims = 512
 ff_fc = 256
-num_heads = 8
+num_heads = 4
 dropout_rate = 0.1
-BATCH_SIZE = 10
+HISTORY_TABLE_SIZE = 128
 
-#for i in range(Np):
-#    print(x_train[i], y_train[i])
+#BATCH_SIZE = 10
+BUFFER_SIZE = 1000 # The number of elements and NOT the number of bytes for the buffer
 
 
-#transformer.build(input_shape=(1, 3))
-foo = x_train[0:256]
-bar = x_train[256:256+256]
 
 transformer = Transformer(
     num_layers=num_layers,
     d_dims=d_dims,
     num_heads=num_heads,
     ff_fc=ff_fc,
-    input_vocab_size=256,
-    target_vocab_size=1,
+    input_vocab_size=HISTORY_TABLE_SIZE,
+    target_vocab_size=2,
     dropout_rate=dropout_rate)
 
 
+transformer.compile(
+    #loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none'),
+    loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+    optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
+    metrics=["accuracy"]
+)
 
-print("BLANK AND EMPTY:", transformer((foo, bar)))
-transformer.summary()
+#print("BLANK AND EMPTY:",  transformer((foo, bar)))
+#transformer.summary()
+
+x_train_raw, y_train_raw = read_data(sys.argv[1])
+
+x_train, y_train = make_batches(x_train_raw, y_train_raw)
+print("x_train", x_train[0].shape, x_train[1].shape)
+print("y_train", y_train.shape)
+
+for i in range(len(x_train_raw)):
+    print(x_train_raw[i], y_train_raw[i])
+
+transformer.fit(
+    x=x_train,
+    y=y_train, 
+    epochs=10,
+    batch_size=10,
+    shuffle=False
+    #validation_data=(x_test, y_test)
+)  
+
 # usage transformer((context, inputs))

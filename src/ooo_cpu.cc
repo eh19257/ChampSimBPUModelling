@@ -256,7 +256,7 @@ void O3_CPU::init_instruction(ooo_model_instr arch_instr, std::fstream * data_st
 
     // Get branching data for each instruction
     if (data_stream != NULL){
-      bp_model_packet single_packet(arch_instr.ip, (uint64_t) arch_instr.branch_type, predicted_branch_target, (uint64_t) branch_prediction);//, mispredicted);
+      bp_model_packet single_packet(arch_instr.ip, (uint64_t) arch_instr.branch_type, predicted_branch_target, (uint64_t) branch_prediction, (uint64_t) (predicted_branch_target == arch_instr.branch_target));//, mispredicted);
       //bp_model_packet single_packet(0xFFEEDDCCBBAA9988, 0xEE, 0x7766554433221100, 0xCC);
       //fwrite(&single_packet, sizeof(bp_model_packet), 1, data_stream);
       //std::cout << single_packet.ip << ", " << single_packet.branch_type << ", " << single_packet.branch_addr << ", " << single_packet.branch_prediction << std::endl;

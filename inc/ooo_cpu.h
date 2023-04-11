@@ -41,16 +41,20 @@ struct bp_model_packet{
   // actual value
   uint64_t branch_prediction = 0; // ORIGINALLY uint8_t!!!
 
+  uint64_t actual_branch_behaviour = 0;
+
   // Actual value
   //uint8_t mispredicted = 0;
 
-  bp_model_packet(uint64_t ip, uint64_t branch_type, uint64_t branch_addr, uint64_t branch_prediction){//, uint8_t mispredicted){
+  bp_model_packet(uint64_t ip, uint64_t branch_type, uint64_t branch_addr, uint64_t branch_prediction, uint64_t actual_branch_behaviour){//, uint8_t mispredicted){
     this->ip = ip;
     this->branch_type = branch_type;
 
     this->branch_addr = branch_addr;
 
     this->branch_prediction= branch_prediction;
+
+    this->actual_branch_behaviour = actual_branch_behaviour;
 
     //std::cout << branch_prediction << std::endl;
     // Preprocessing of data such that a branch is a binary value
