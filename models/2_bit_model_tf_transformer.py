@@ -6,6 +6,10 @@ from tensorflow.keras import layers
 import struct
 import sys
 
+# Use GPUs
+gpus = tf.config.list_physical_devices('GPU')
+print("Num GPUs Available: ", len(gpus))
+
 bp_model_packet = np.dtype([
         ("ip", '<u8'),
         ("branch_type", '<u8'),
