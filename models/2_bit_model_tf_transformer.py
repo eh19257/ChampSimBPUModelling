@@ -44,6 +44,7 @@ def read_data(filename):
         else:
             hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
 
+    # Normalising the data
     data[:, :, 0] = (data[:, :, 0] ) / float(2**20 - 1) #- 1
     data[:, :, 1] = (data[:, :, 1] ) / float(7        ) #- 1 
     data[:, :, 2] = (data[:, :, 2] ) / float(2**20 - 1) #- 1
@@ -54,7 +55,7 @@ def read_data(filename):
 
     #dataset = tf.data.Dataset.from_tensor_slices((x_out, y_out))
 
-    return x_out[0:1000], y_out[0:1000]
+    return x_out, y_out
     #return data[:, :, 0:3], data[:, :, 3].reshape((Np, 1, 1))
 
 
@@ -67,13 +68,13 @@ def positional_encoding(length, depth):
 
   angle_rates = 1 / (10000**depths)         # (1, depth)
   angle_rads = positions * angle_rates      # (pos, depth)
-  print("angle_rads:", angle_rads.shape)
+  #print("angle_rads:", angle_rads.shape)
 
   pos_encoding = np.concatenate(
       [np.sin(angle_rads), np.cos(angle_rads)],
       axis=-1) 
 
-  print("pos_encoding.shape:", pos_encoding.shape)
+  #print("pos_encoding.shape:", pos_encoding.shape)
   return tf.cast(pos_encoding, dtype=tf.float32)
 
 
@@ -435,6 +436,8 @@ def make_batches(x, y, h=128):
         enc[i] = x[ i     : i + h     ].reshape((h, 4))
         dec[i] = x[ i + h : i + h + 1 ].reshape((1, 4))
 
+        # Edit the actual_branch_behaviour of dec so that it's 0.5 (i.e. a probability that could be either taken or not taken)  
+        dec[i][0][3] = 0.5
         #print("enc", enc.shape)
         #print("dec", dec.shape)
 
@@ -490,8 +493,8 @@ x_train, y_train = make_batches(x_train_raw, y_train_raw)
 print("x_train", x_train[0].shape, x_train[1].shape)
 print("y_train", y_train.shape)
 
-for i in range(len(x_train_raw)):
-    print(x_train_raw[i], y_train_raw[i])
+#for i in range(len(x_train[0])):
+#    print(x_train[0][i], x_train[1][i], y_train[0][i])
 
 transformer.fit(
     x=x_train,
