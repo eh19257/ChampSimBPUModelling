@@ -2,4 +2,4 @@
 module load lang/python/anaconda/3.9.7-2021.12-tensorflow.2.7.0
 
 # Run w/ slurm
-srun --job-name bp_model_2_bit_tf_transformer_pwd --partition gpu --nodes 1 --gres gpu:1 --mem 4GB -o ./outputs/log_%j.out -e ./outputs/log_%j.err python3 2_bit_model_tf_transformer.py ../../data/bp_models/2_bit/pwd.bin
+srun --job-name bp_model_2_bit_tf_transformer_pwd --partition gpu --nodes 1 --gres gpu:1 --mem 4GB --account=COSC027924 -o ./outputs/log_%j.out -e ./outputs/log_%j.err python3 2_bit_model_tf_transformer.py ../../data/bp_models/2_bit/pwd.bin

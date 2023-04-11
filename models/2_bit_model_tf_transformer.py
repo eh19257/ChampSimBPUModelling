@@ -32,6 +32,7 @@ def read_data(filename):
 
     global Np
     Np = len(raw_data)
+    Np = 1000
 
     data = np.zeros((Np, 1, 4), dtype=np.double )
     hot_ones = np.zeros((Np, 1, 2), dtype=np.double)
@@ -460,7 +461,7 @@ def make_batches(x, y, h=128):
 ###################################################################################################
 
 num_layers = 4
-d_dims = 512
+d_dims = 256
 ff_fc = 256
 num_heads = 4
 dropout_rate = 0.1
@@ -488,9 +489,6 @@ transformer.compile(
     metrics=["accuracy"]
 )
 
-#print("BLANK AND EMPTY:",  transformer((foo, bar)))
-#transformer.summary()
-
 x_train_raw, y_train_raw = read_data(sys.argv[1])
 
 x_train, y_train = make_batches(x_train_raw, y_train_raw)
@@ -499,6 +497,10 @@ print("y_train", y_train.shape)
 
 #for i in range(len(x_train[0])):
 #    print(x_train[0][i], x_train[1][i], y_train[0][i])
+
+
+transformer((x_train[0][0:1], x_train[1][0:1]))
+transformer.summary()
 
 transformer.fit(
     x=x_train,
