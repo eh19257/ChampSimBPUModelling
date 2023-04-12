@@ -7,8 +7,8 @@ import struct
 import sys
 
 # Use GPUs
-gpus = tf.config.list_physical_devices('GPU')
-print("Num GPUs Available: ", len(gpus))
+#gpus = tf.config.list_physical_devices('GPU')
+#print("Num GPUs Available: ", len(gpus))
 
 bp_model_packet = np.dtype([
         ("ip", '<u8'),
@@ -491,6 +491,8 @@ transformer.compile(
 
 x_train_raw, y_train_raw = read_data(sys.argv[1])
 
+print("Size of x_train_raw:", x_train_raw.shape)
+
 x_train, y_train = make_batches(x_train_raw, y_train_raw)
 print("x_train", x_train[0].shape, x_train[1].shape)
 print("y_train", y_train.shape)
@@ -506,7 +508,7 @@ transformer.fit(
     x=x_train,
     y=y_train, 
     epochs=10,
-    batch_size=10,
+    batch_size=5,
     shuffle=False
     #validation_data=(x_test, y_test)
 )  
