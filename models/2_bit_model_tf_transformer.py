@@ -346,6 +346,8 @@ class Transformer(keras.Model):
         self.final_fc_1 = layers.Dense(int(d_dims / 32))
 
         self.final_fc_2 = layers.Dense(target_vocab_size)
+
+        self.softmax = layers.Softmax()
     
 
     def call(self, inputs):
@@ -377,8 +379,9 @@ class Transformer(keras.Model):
         except AttributeError:
             pass
 
+        probs = self.softmax(logits)
         # Return the final output and the attention weights.
-        return logits
+        return probs
 
 
 ###################################################################################################
@@ -485,7 +488,8 @@ transformer = Transformer(
 transformer.compile(
     #loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none'),
     loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-    optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
+    #optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
+    optimizer=tf.keras.optimizers.Adam(learning_rate= CustomSchedule(d_dims=d_dims) ),
     metrics=["accuracy"]
 )
 
@@ -508,7 +512,7 @@ transformer.fit(
     x=x_train,
     y=y_train, 
     epochs=10,
-    batch_size=10,
+    batch_size=100,
     shuffle=False,
     validation_data=(x_test, y_test)
 )  
