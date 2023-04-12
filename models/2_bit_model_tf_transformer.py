@@ -490,12 +490,12 @@ transformer.compile(
 )
 
 x_train_raw, y_train_raw = read_data(sys.argv[1])
+x_test_raw , y_test_raw  = read_data(sys.argv[2])
 
 print("Size of x_train_raw:", x_train_raw.shape)
 
 x_train, y_train = make_batches(x_train_raw, y_train_raw)
-print("x_train", x_train[0].shape, x_train[1].shape)
-print("y_train", y_train.shape)
+x_test,  y_test  = make_batches(x_test_raw,  y_test_raw )
 
 #for i in range(len(x_train[0])):
 #    print(x_train[0][i], x_train[1][i], y_train[0][i])
@@ -510,7 +510,8 @@ transformer.fit(
     epochs=10,
     batch_size=5,
     shuffle=False
-    #validation_data=(x_test, y_test)
+    validation_data=(x_test, y_test)
 )  
 
+transformer.save(sys.argv[3])
 # usage transformer((context, inputs))
