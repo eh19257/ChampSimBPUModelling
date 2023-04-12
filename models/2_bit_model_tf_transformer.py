@@ -512,7 +512,7 @@ transformer.fit(
     x=x_train,
     y=y_train, 
     epochs=10,
-    batch_size=100,
+    batch_size=256,
     shuffle=False,
     validation_data=(x_test, y_test)
 )  
