@@ -6,6 +6,9 @@ from tensorflow.keras import layers
 import struct
 import sys
 
+# Use GPUs
+gpus = tf.config.list_physical_devices('GPU')
+print("Num GPUs Available: ", len(gpus))
 
 bp_model_packet = np.dtype([
         ("ip", '<u8'),
@@ -471,74 +474,48 @@ HISTORY_TABLE_SIZE = 128
 BUFFER_SIZE = 1000 # The number of elements and NOT the number of bytes for the buffer
 
 
-##### RUNNING WITH MULTIPLE GPUS
 
-gpus = tf.config.list_physical_devices('GPU')
-if gpus:
-  # Create 2 virtual GPUs with 1GB memory each
-  try:
-    tf.config.set_logical_device_configuration(
-        gpus[0],
-        [tf.config.LogicalDeviceConfiguration(memory_limit=1024 * 10),
-         tf.config.LogicalDeviceConfiguration(memory_limit=1024 * 10)])
-    logical_gpus = tf.config.list_logical_devices('GPU')
-    print(len(gpus), "Physical GPU,", len(logical_gpus), "Logical GPUs")
-  except RuntimeError as e:
-    # Virtual devices must be set before GPUs have been initialized
-    print(e)
+transformer = Transformer(
+    num_layers=num_layers,
+    d_dims=d_dims,
+    num_heads=num_heads,
+    ff_fc=ff_fc,
+    input_vocab_size=HISTORY_TABLE_SIZE,
+    target_vocab_size=2,
+    dropout_rate=dropout_rate)
 
 
-# enable device logging
-tf.debugging.set_log_device_placement(True)
+transformer.compile(
+    #loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none'),
+    loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+    #optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
+    optimizer=tf.keras.optimizers.Adam(learning_rate= CustomSchedule(d_dims=d_dims) ),
+    metrics=["accuracy"]
+)
 
-# Use GPUs
-gpus = tf.config.list_physical_devices('GPU')
-print("Num GPUs Available: ", len(gpus))
+x_train_raw, y_train_raw = read_data(sys.argv[1])
+x_test_raw , y_test_raw  = read_data(sys.argv[2])
 
-# Strategy - this is used to split over multiple GPUs
-strategy = tf.distribute.MirroredStrategy(gpus)
-with strategy.scope():
-    transformer = Transformer(
-        num_layers=num_layers,
-        d_dims=d_dims,
-        num_heads=num_heads,
-        ff_fc=ff_fc,
-        input_vocab_size=HISTORY_TABLE_SIZE,
-        target_vocab_size=2,
-        dropout_rate=dropout_rate)
+print("Size of x_train_raw:", x_train_raw.shape)
 
+x_train, y_train = make_batches(x_train_raw, y_train_raw)
+x_test,  y_test  = make_batches(x_test_raw,  y_test_raw )
 
-    transformer.compile(
-        #loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none'),
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-        #optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
-        optimizer=tf.keras.optimizers.Adam(learning_rate= CustomSchedule(d_dims=d_dims) ),
-        metrics=["accuracy"]
-    )
-
-    x_train_raw, y_train_raw = read_data(sys.argv[1])
-    x_test_raw , y_test_raw  = read_data(sys.argv[2])
-
-    print("Size of x_train_raw:", x_train_raw.shape)
-
-    x_train, y_train = make_batches(x_train_raw, y_train_raw)
-    x_test,  y_test  = make_batches(x_test_raw,  y_test_raw )
-
-    #for i in range(len(x_train[0])):
-    #    print(x_train[0][i], x_train[1][i], y_train[0][i])
+#for i in range(len(x_train[0])):
+#    print(x_train[0][i], x_train[1][i], y_train[0][i])
 
 
-    transformer((x_train[0][0:1], x_train[1][0:1]))
-    transformer.summary()
+transformer((x_train[0][0:1], x_train[1][0:1]))
+transformer.summary()
 
-    transformer.fit(
-        x=x_train,
-        y=y_train, 
-        epochs=10,
-        batch_size=128,
-        shuffle=False,
-        validation_data=(x_test, y_test)
-    )  
+transformer.fit(
+    x=x_train,
+    y=y_train, 
+    epochs=10,
+    batch_size=128,
+    shuffle=False,
+    validation_data=(x_test, y_test)
+)  
 
-    transformer.save(sys.argv[3])
-    # usage transformer((context, inputs))
+transformer.save(sys.argv[3])
+# usage transformer((context, inputs))
