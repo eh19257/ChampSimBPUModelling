@@ -19,4 +19,7 @@ module load lang/cuda/11.2-cudnn-8.1
 # Load libcudart.so.11.0
 export LD_LIBRARY_PATH=:$LD_LIBRARY_PATH:/sw/lang/cuda_11.2.2/targets/x86_64-linux/lib
 
+# allocate async memory or smth (apparently it helps)
+export TF_GPU_ALLOCATOR=cuda_malloc_async
+
 python3 2_bit_model_tf_transformer.py ../../data/bp_models/2_bit/pwd.bin ../../data/bp_models/2_bit/ls.bin SAVED_MODEL_tf_transformer.bin
