@@ -461,11 +461,25 @@ def make_batches(x, y, h=128):
     return (enc, dec), y_out
     #return tf.data.Dataset.from_tensor_slices(xs), tf.data.Dataset.from_tensor_slices(ys)#(tf.data.Dataset(enc), tf.data.Dataset(dec.)), tf.data.Dataset(y_out)
 
+'''
+class DataGenerator(Sequence):
+    def __init__(self, x_set, y_set, batch_size):
+        self.x, self.y = x_set, y_set
+        self.batch_size = batch_size
+
+    def __len__(self):
+        return int(np.ceil(len(self.x) / float(self.batch_size)))
+
+    def __getitem__(self, idx):
+        batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
+        batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
+        return batch_x, batch_y
+'''
 ###################################################################################################
 
 num_layers = 4
-d_dims = 256
-ff_fc = 256
+d_dims = 128
+ff_fc = 128
 num_heads = 4
 dropout_rate = 0.1
 HISTORY_TABLE_SIZE = 128
@@ -512,7 +526,7 @@ transformer.fit(
     x=x_train,
     y=y_train, 
     epochs=10,
-    batch_size=64,
+    batch_size=32,
     shuffle=False,
     validation_data=(x_test, y_test)
 )  
