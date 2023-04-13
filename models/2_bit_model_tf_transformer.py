@@ -6,12 +6,6 @@ from tensorflow.keras import layers
 import struct
 import sys
 
-# enable device logging
-tf.debugging.set_log_device_placement(True)
-
-# Use GPUs
-gpus = tf.config.list_physical_devices('GPU')
-print("Num GPUs Available: ", len(gpus))
 
 bp_model_packet = np.dtype([
         ("ip", '<u8'),
@@ -475,6 +469,31 @@ HISTORY_TABLE_SIZE = 128
 
 #BATCH_SIZE = 10
 BUFFER_SIZE = 1000 # The number of elements and NOT the number of bytes for the buffer
+
+
+##### RUNNING WITH MULTIPLE GPUS
+
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+  # Create 2 virtual GPUs with 1GB memory each
+  try:
+    tf.config.set_logical_device_configuration(
+        gpus[0],
+        [tf.config.LogicalDeviceConfiguration(memory_limit=1024 * 10),
+         tf.config.LogicalDeviceConfiguration(memory_limit=1024 * 10)])
+    logical_gpus = tf.config.list_logical_devices('GPU')
+    print(len(gpus), "Physical GPU,", len(logical_gpus), "Logical GPUs")
+  except RuntimeError as e:
+    # Virtual devices must be set before GPUs have been initialized
+    print(e)
+
+
+# enable device logging
+tf.debugging.set_log_device_placement(True)
+
+# Use GPUs
+gpus = tf.config.list_physical_devices('GPU')
+print("Num GPUs Available: ", len(gpus))
 
 # Strategy - this is used to split over multiple GPUs
 strategy = tf.distribute.MirroredStrategy(gpus)
