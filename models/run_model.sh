@@ -3,8 +3,8 @@
 #SBATCH --job-name bp_model_2_bit_tf_transformer_pwd
 #SBATCH --partition gpu
 #SBATCH --nodes 1
-#SBATCH --gres gpu:1,gpu:2
-#SBATCH --mem 48GB
+#SBATCH --gres gpu:0,gpu:1,gpu:2,gpu:3
+#SBATCH --mem 64GB
 #SBATCH --account=COSC027924
 #SBATCH -o ./outputs/log_%j.out
 #SBATCH -e ./outputs/log_%j.err
