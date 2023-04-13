@@ -6,6 +6,9 @@ from tensorflow.keras import layers
 import struct
 import sys
 
+# enable device logging
+tf.debugging.set_log_device_placement(True)
+
 # Use GPUs
 gpus = tf.config.list_physical_devices('GPU')
 print("Num GPUs Available: ", len(gpus))
@@ -473,49 +476,50 @@ HISTORY_TABLE_SIZE = 128
 #BATCH_SIZE = 10
 BUFFER_SIZE = 1000 # The number of elements and NOT the number of bytes for the buffer
 
+# Strategy - this is used to split over multiple GPUs
+strategy = tf.distribute.MirroredStrategy(gpus)
+with strategy.scope():
+    transformer = Transformer(
+        num_layers=num_layers,
+        d_dims=d_dims,
+        num_heads=num_heads,
+        ff_fc=ff_fc,
+        input_vocab_size=HISTORY_TABLE_SIZE,
+        target_vocab_size=2,
+        dropout_rate=dropout_rate)
 
 
-transformer = Transformer(
-    num_layers=num_layers,
-    d_dims=d_dims,
-    num_heads=num_heads,
-    ff_fc=ff_fc,
-    input_vocab_size=HISTORY_TABLE_SIZE,
-    target_vocab_size=2,
-    dropout_rate=dropout_rate)
+    transformer.compile(
+        #loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none'),
+        loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+        #optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
+        optimizer=tf.keras.optimizers.Adam(learning_rate= CustomSchedule(d_dims=d_dims) ),
+        metrics=["accuracy"]
+    )
+
+    x_train_raw, y_train_raw = read_data(sys.argv[1])
+    x_test_raw , y_test_raw  = read_data(sys.argv[2])
+
+    print("Size of x_train_raw:", x_train_raw.shape)
+
+    x_train, y_train = make_batches(x_train_raw, y_train_raw)
+    x_test,  y_test  = make_batches(x_test_raw,  y_test_raw )
+
+    #for i in range(len(x_train[0])):
+    #    print(x_train[0][i], x_train[1][i], y_train[0][i])
 
 
-transformer.compile(
-    #loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none'),
-    loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-    #optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
-    optimizer=tf.keras.optimizers.Adam(learning_rate= CustomSchedule(d_dims=d_dims) ),
-    metrics=["accuracy"]
-)
+    transformer((x_train[0][0:1], x_train[1][0:1]))
+    transformer.summary()
 
-x_train_raw, y_train_raw = read_data(sys.argv[1])
-x_test_raw , y_test_raw  = read_data(sys.argv[2])
+    transformer.fit(
+        x=x_train,
+        y=y_train, 
+        epochs=10,
+        batch_size=128,
+        shuffle=False,
+        validation_data=(x_test, y_test)
+    )  
 
-print("Size of x_train_raw:", x_train_raw.shape)
-
-x_train, y_train = make_batches(x_train_raw, y_train_raw)
-x_test,  y_test  = make_batches(x_test_raw,  y_test_raw )
-
-#for i in range(len(x_train[0])):
-#    print(x_train[0][i], x_train[1][i], y_train[0][i])
-
-
-transformer((x_train[0][0:1], x_train[1][0:1]))
-transformer.summary()
-
-transformer.fit(
-    x=x_train,
-    y=y_train, 
-    epochs=10,
-    batch_size=128,
-    shuffle=False,
-    validation_data=(x_test, y_test)
-)  
-
-transformer.save(sys.argv[3])
-# usage transformer((context, inputs))
+    transformer.save(sys.argv[3])
+    # usage transformer((context, inputs))
