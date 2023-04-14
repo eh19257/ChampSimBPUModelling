@@ -400,7 +400,7 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         arg1 = tf.math.rsqrt(step)
         arg2 = step * (self.warmup_steps ** -1.5)
 
-        return tf.math.rsqrt(self.d_dims) * tf.math.minimum(arg1, arg2)
+        return tf.math.rsqrt(self.d_dims) * tf.math.minimum(arg1, arg2) * 0.1
 
 
 def masked_loss(label, pred):
@@ -501,9 +501,10 @@ transformer = Transformer(
 
 transformer.compile(
     #loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none'),
-    loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+    #loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+    loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
     #optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
-    optimizer=tf.keras.optimizers.Adam(learning_rate=CustomSchedule(d_dims=d_dims) * 0.1 ),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=CustomSchedule(d_dims=d_dims) ),
     metrics=["accuracy"]
 )
 
@@ -532,4 +533,3 @@ transformer.fit(
 )  
 
 transformer.save(sys.argv[3])
-# usage transformer((context, inputs))
