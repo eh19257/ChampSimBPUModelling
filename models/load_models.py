@@ -135,4 +135,4 @@ x_train, y_train = make_batches(x_train_raw, y_train_raw)
 x_test,  y_test  = make_batches(x_test_raw,  y_test_raw )
 
 
-transformer.load_weights(sys.argv[1])
+transformer.load_weights(sys.argv[3])
