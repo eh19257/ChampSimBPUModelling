@@ -527,8 +527,8 @@ transformer.fit(
     x=x_train,
     y=y_train, 
     epochs=1,
-    batch_size=1,
-    shuffle=True,
+    batch_size=32,
+    shuffle=False,
     validation_data=(x_test, y_test)
 )  
 
