@@ -485,7 +485,7 @@ dropout_rate = 0.1
 HISTORY_TABLE_SIZE = 128
 
 #BATCH_SIZE = 10
-BUFFER_SIZE = 1000 # The number of elements and NOT the number of bytes for the buffer
+#BUFFER_SIZE = 1000 # The number of elements and NOT the number of bytes for the buffer
 
 
 
@@ -503,7 +503,7 @@ transformer.compile(
     #loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none'),
     loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
     #optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
-    optimizer=tf.keras.optimizers.Adam(learning_rate= CustomSchedule(d_dims=d_dims) ),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=CustomSchedule(d_dims=d_dims) * 0.1 ),
     metrics=["accuracy"]
 )
 
@@ -525,9 +525,9 @@ transformer.summary()
 transformer.fit(
     x=x_train,
     y=y_train, 
-    epochs=10,
-    batch_size=1,
-    shuffle=False,
+    epochs=1,
+    batch_size=32,
+    shuffle=True,
     validation_data=(x_test, y_test)
 )  
 
