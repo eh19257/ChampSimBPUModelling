@@ -32,7 +32,7 @@ def read_data(filename):
 
     global Np
     Np = len(raw_data)
-    #Np = 1000
+    Np = 10000
 
     data = np.zeros((Np, 1, 4), dtype=np.double )
     hot_ones = np.zeros((Np, 1, 2), dtype=np.double)
@@ -352,11 +352,12 @@ class Transformer(keras.Model):
 
     def call(self, inputs):
         context, x = inputs
-        
+        #tf.print("Inputs:", inputs)
+        #tf.print(context)
         print("CONTEXT:", context.shape); print("DECODER:", x.shape)
         context = self.encoder(context); print("POST ENCODER:", context.shape)
 
-        x = self.decoder(x, context); print("POST DECODER:", x)
+        x = self.decoder(x, context); #print("POST DECODER:", x)
 
         #logits = self.reshape(x)
 
@@ -468,12 +469,32 @@ class DataGenerator(keras.utils.Sequence):
         self.batch_size = batch_size
 
     def __len__(self):
-        return int(np.ceil(len(self.x) / float(self.batch_size)))
+        return len(self.x[0]) // self.batch_size#int(np.floor(len(self.x[0]) / float(self.batch_size)))
 
+    # This should return a single batch
     def __getitem__(self, idx):
-        batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
-        batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
-        return batch_x, batch_y
+
+        #tf.print("look at self.x:", self.x)
+        enc = self.x[ 0 ][ idx * self.batch_size : (idx + 1) * self.batch_size ]#.reshape((self.batch_size, ))
+        dec = self.x[ 1 ][ idx * self.batch_size : (idx + 1) * self.batch_size ]
+
+        label = self.y[ idx * self.batch_size : (idx + 1) * self.batch_size ]
+        #batch_x = (self.x[0][idx * self.batch_size : (idx + 1) * self.batch_size], self.x[1][idx * self.batch_size : (idx + 1) * self.batch_size])
+        #batch_y = self.y[idx * self.batch_size : (idx + 1) * self.batch_size]
+
+
+        print("IDX is:", idx)
+        print("Shape of enc", enc.shape)
+        print("Shape of dec", dec.shape)
+        print("")
+        '''
+        batch_x = []
+        batch_y = []
+        for i in range(idx * self.batch_size, (idx + 1) * self.batch_size):
+            batch_x.append( (self.x[0][i], self.x[1][i]) )
+            batch_y.append(  self.y[i] )
+        '''
+        return (enc, dec), label
 
 ###################################################################################################
 
@@ -517,19 +538,27 @@ x_train, y_train = make_batches(x_train_raw, y_train_raw, h=HISTORY_TABLE_SIZE)
 
 print("Data is being converted into a data generator...")
 
+#train = tf.data.Dataset.from_generator(DataGenerator(x_train, y_train, BATCH_SIZE))
 train = DataGenerator(x_train, y_train, BATCH_SIZE)
 #test  = DataGenerator(x_test, y_test, BATCH_SIZE)
 
 
-#transformer(train)#(x_train[0][0:1], x_train[1][0:1]))
-#transformer.summary()
+#print("Example Line:", train.__getitem__(1))
+
+#for i in train: print(i)
+transformer(train.__getitem__(0)[0])
+transformer.summary()
+
 
 transformer.fit(
-    train, 
+    train,
+    #x=x_train,
+    #y=y_train, 
     epochs=1,
     #batch_size=BATCH_SIZE,
     shuffle=False#,
     #validation_data=test
 )
-
+'''
 transformer.save(sys.argv[3])
+'''
