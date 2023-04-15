@@ -478,8 +478,8 @@ class DataGenerator(Sequence):
 ###################################################################################################
 
 num_layers = 4
-d_dims = 128
-ff_fc = 128
+d_dims = 64#128
+ff_fc = 64#128
 num_heads = 4
 dropout_rate = 0.1
 HISTORY_TABLE_SIZE = 128
@@ -504,7 +504,7 @@ transformer.compile(
     #loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
     loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
     #optimizer=tf.keras.optimizers.SGD(learning_rate= CustomSchedule(d_dims=d_dims) ),
-    optimizer=tf.keras.optimizers.Adam(learning_rate=CustomSchedule(d_dims=d_dims) ),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),#CustomSchedule(d_dims=d_dims) ),
     metrics=["accuracy"]
 )
 
@@ -513,8 +513,8 @@ x_test_raw , y_test_raw  = read_data(sys.argv[2])
 
 print("Size of x_train_raw:", x_train_raw.shape)
 
-x_train, y_train = make_batches(x_train_raw, y_train_raw)
-x_test,  y_test  = make_batches(x_test_raw,  y_test_raw )
+x_train, y_train = make_batches(x_train_raw, y_train_raw, h=HISTORY_TABLE_SIZE)
+x_test,  y_test  = make_batches(x_test_raw,  y_test_raw, h=HISTORY_TABLE_SIZE)
 
 #for i in range(len(x_train[0])):
 #    print(x_train[0][i], x_train[1][i], y_train[0][i])
@@ -530,6 +530,6 @@ transformer.fit(
     batch_size=64,
     shuffle=False,
     validation_data=(x_test, y_test)
-)  
+)
 
 transformer.save(sys.argv[3])
