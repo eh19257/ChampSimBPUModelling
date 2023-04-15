@@ -461,8 +461,8 @@ def make_batches(x, y, h=128):
     return (enc, dec), y_out
     #return tf.data.Dataset.from_tensor_slices(xs), tf.data.Dataset.from_tensor_slices(ys)#(tf.data.Dataset(enc), tf.data.Dataset(dec.)), tf.data.Dataset(y_out)
 
-'''
-class DataGenerator(Sequence):
+
+class DataGenerator(keras.utils.Sequence):
     def __init__(self, x_set, y_set, batch_size):
         self.x, self.y = x_set, y_set
         self.batch_size = batch_size
@@ -474,7 +474,7 @@ class DataGenerator(Sequence):
         batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
         batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
         return batch_x, batch_y
-'''
+
 ###################################################################################################
 
 num_layers = 4
@@ -484,9 +484,8 @@ num_heads = 4
 dropout_rate = 0.1
 HISTORY_TABLE_SIZE = 128
 
-#BATCH_SIZE = 10
+BATCH_SIZE = 32
 #BUFFER_SIZE = 1000 # The number of elements and NOT the number of bytes for the buffer
-
 
 
 transformer = Transformer(
@@ -509,27 +508,28 @@ transformer.compile(
 )
 
 x_train_raw, y_train_raw = read_data(sys.argv[1])
-x_test_raw , y_test_raw  = read_data(sys.argv[2])
+#x_test_raw , y_test_raw  = read_data(sys.argv[2])
 
 print("Size of x_train_raw:", x_train_raw.shape)
 
 x_train, y_train = make_batches(x_train_raw, y_train_raw, h=HISTORY_TABLE_SIZE)
-x_test,  y_test  = make_batches(x_test_raw,  y_test_raw, h=HISTORY_TABLE_SIZE)
+#x_test,  y_test  = make_batches(x_test_raw,  y_test_raw, h=HISTORY_TABLE_SIZE)
 
-#for i in range(len(x_train[0])):
-#    print(x_train[0][i], x_train[1][i], y_train[0][i])
+print("Data is being converted into a data generator...")
+
+train = DataGenerator(x_train, y_train, BATCH_SIZE)
+#test  = DataGenerator(x_test, y_test, BATCH_SIZE)
 
 
-transformer((x_train[0][0:1], x_train[1][0:1]))
-transformer.summary()
+#transformer(train)#(x_train[0][0:1], x_train[1][0:1]))
+#transformer.summary()
 
 transformer.fit(
-    x=x_train,
-    y=y_train, 
+    train, 
     epochs=1,
-    batch_size=64,
-    shuffle=False,
-    validation_data=(x_test, y_test)
+    #batch_size=BATCH_SIZE,
+    shuffle=False#,
+    #validation_data=test
 )
 
 transformer.save(sys.argv[3])
