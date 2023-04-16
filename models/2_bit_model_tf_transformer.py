@@ -589,12 +589,11 @@ transformer.fit(
     train,
     #x=x_train,
     #y=y_train, 
-    epochs=1,
+    epochs=10,
     #batch_size=BATCH_SIZE,
     shuffle=True
     #validation_data=test
     #verbose='auto'
 )
-'''
+
 transformer.save(sys.argv[3])
-'''
