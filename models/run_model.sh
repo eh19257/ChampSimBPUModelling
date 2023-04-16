@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name bp_model_2_bit_tf_transformer_pwd
+#SBATCH --job-name lr0.001SGD
 #SBATCH --partition gpu
 #SBATCH --nodes 1
 #SBATCH --gres gpu:0,gpu:1,gpu:2
