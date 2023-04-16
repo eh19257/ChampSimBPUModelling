@@ -515,16 +515,7 @@ class DataGenerator(keras.utils.Sequence):
             enc[i] = self.x[ idx * self.batch_size + i + self.h : idx * self.batch_size + i + self.h + 1].reshape( (1     , 4) )
 
             dec[i][0][3] = 0.5
-        
-        '''
-        for i in range(1, self.batch_size + 1):
-            enc[i] = self.x[ i * idx          : i + self.h     ].reshape( (self.h, 4) )
-            dec[i] = self.x[ i + self.h : i + self.h + 1 ].reshape( (1     , 4) )
-
-            # Edit the actual_branch_behaviour of dec so that it's 0.5 (i.e. a probability that could be either taken or not taken)  
-            dec[i][0][3] = 0.5
-        '''
-        
+      
         return (enc, dec)
 
 
@@ -600,7 +591,7 @@ transformer.fit(
     #y=y_train, 
     epochs=1,
     #batch_size=BATCH_SIZE,
-    shuffle=False
+    shuffle=True
     #validation_data=test
     #verbose='auto'
 )
