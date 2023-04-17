@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name lr0.0001SGD
+#SBATCH --job-name h5
 #SBATCH --partition gpu
 #SBATCH --nodes 1
 #SBATCH --gres gpu:0,gpu:1,gpu:2
 #SBATCH --mem 64GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/piss/log_%j.out
-#SBATCH -e ./outputs/piss/log_%j.err
+#SBATCH -o ./outputs/h5/log_%j.out
+#SBATCH -e ./outputs/h5/log_%j.err
 
 
 echo "##### - Starting - #####"
@@ -22,4 +22,4 @@ export LD_LIBRARY_PATH=:$LD_LIBRARY_PATH:/sw/lang/cuda_11.2.2/targets/x86_64-lin
 # allocate async memory or smth (apparently it helps)
 export TF_GPU_ALLOCATOR=cuda_malloc_async
 
-python3 2_bit_model_tf_transformer.py ../../data/bp_models/2_bit/pwd.bin ../../data/bp_models/2_bit/ls.bin .outputs/piss/SAVED_MODEL
+python3 2_bit_model_tf_transformer.py ../../data/bp_models/2_bit/pwd.bin ../../data/bp_models/2_bit/ls.bin .outputs/h5/SAVED_MODEL
