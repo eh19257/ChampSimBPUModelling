@@ -32,7 +32,7 @@ def read_data(filename):
 
     global Np
     Np = len(raw_data)
-    #Np = 1000
+    Np = 1000
 
     data = np.zeros((Np, 1, 4), dtype=np.double )
     hot_ones = np.zeros((Np, 1, 2), dtype=np.double)
@@ -376,6 +376,7 @@ class Transformer(keras.Model):
         print("ULTIMATE ULTIMATE SHAPE:", logits.shape)
 
 
+        '''
         # SOME TF thing - go and understand it!!!
         try:
             # Drop the keras mask, so it doesn't scale the losses/metrics.
@@ -383,6 +384,7 @@ class Transformer(keras.Model):
             del logits._keras_mask
         except AttributeError:
             pass
+        '''
 
         probs = self.softmax(logits)
         # Return the final output and the attention weights.
