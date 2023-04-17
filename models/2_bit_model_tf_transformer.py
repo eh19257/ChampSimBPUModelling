@@ -114,6 +114,15 @@ class PositionalEmbedding(tf.keras.layers.Layer):
     x = x + self.pos_encoding[tf.newaxis, self.start : self.start + length, :]
     return x
 
+  def get_config(self):
+    config = super(self).get_config().copy()
+    config.update({"d_dims"       : self.d_dims, 
+                   "start"        : self.start,
+                   "vocab_size"   : self.vocab_size,
+                   "expand"       : self.expand,
+                   "pos_encoding" : self.pos_encoding
+    })
+    return config
 
 
 # The base attention layer
@@ -122,7 +131,15 @@ class BaseAttention(layers.Layer):
         super().__init__()
         self.mha = layers.MultiHeadAttention(**kwargs)
         self.add = layers.Add()
-        self.norm = layers.LayerNormalization()        
+        self.norm = layers.LayerNormalization()  
+
+    def get_config(self):
+        config = super(self).get_config().copy()
+        config.update({ "mha"  : self.mha,
+                        "add"  : self.add,
+                        "norm" : self.norm
+        })    
+        return config  
 
 
 # Cross attention component of the Transformer - takes in the context from the encoder and is found in the decoder
@@ -143,6 +160,9 @@ class CrossAttention(BaseAttention):
         x = self.add([x, attention_output])
         x = self.norm(x)
         return x
+    
+    def get_config(self):
+        return super(self).get_config().copy()
 
 
 # Found at the input side of the encoder, here we extract information from the input and take in information from all the inputs
@@ -162,6 +182,9 @@ class GlobalSelfAttention(BaseAttention):
         x = self.norm(x)
 
         return x
+    
+    def get_config(self):
+        return super(self).get_config().copy()
 
 
 # Found at the input side of he decoder, takes in information from previous decoder inputs
@@ -184,6 +207,9 @@ class CausalSelfAttention(BaseAttention):
         x = self.norm(x)
 
         return x
+
+    def get_config(self):
+        return super(self).get_config().copy()
 
 
 # Here we have the FC/Dense part of the encoder/decoder - this part is for classification and there is NO point of doing any feature 
@@ -209,6 +235,15 @@ class FeedForward(layers.Layer):
 
         return x
 
+    def get_config(self):
+        config = super(self).get_config().copy()
+        config.update({ "seq" : self.seq,
+                        "add" : sef.add,
+                        "norm": self.norm
+
+        })
+        return config
+
 
 class EncoderLayer(layers.Layer):
     def __init__(self, *, d_dims, num_heads, ff_fc, dropout_rate):
@@ -228,6 +263,13 @@ class EncoderLayer(layers.Layer):
         x = self.ff(x); print("POST FF:", x.shape)
 
         return x
+
+    def get_config(self):
+        config = super(self).get_config().copy()
+        config.update({ "self_attention" : self.self_attention,
+                        "ff"             : self.ff
+        })
+        return config
 
 class Encoder(layers.Layer):
     def __init__(self, *, num_layers, d_dims, num_heads, ff_fc, vocab_size, dropout_rate=0.1):
@@ -259,6 +301,17 @@ class Encoder(layers.Layer):
         return x
 
 
+    def get_config(self):
+        config = super(self).get_config().copy()
+        config.update({ "d_dims"         : self.d_dims,
+                        "num_layers"     : self.num_layers,
+                        "pos_embedding"  : self.pos_embedding,
+                        "dropout"        : self.dropout,
+                        "enc_layers"     : self.enc_layers
+        })
+        return config
+
+
 class DecoderLayer(layers.Layer):
     def __init__(self, *, d_dims, num_heads, ff_fc, dropout_rate):
         super(DecoderLayer, self).__init__()
@@ -287,6 +340,15 @@ class DecoderLayer(layers.Layer):
 
         x = self.ff(x)
         return x
+    
+    def get_config(self):
+        config = super(self).get_config().copy()
+        config.update({ "causal_self_attention" : self.causal_self_attention,
+                        "cross_attention"       : self.cross_attention, 
+                        "ff"                    : self.ff
+        })
+        return config
+
 
 class Decoder(layers.Layer):
     def __init__(self, *, num_layers, d_dims, num_heads, ff_fc, vocab_size, dropout_rate=0.1, enc_vocab_size=0):
@@ -323,6 +385,17 @@ class Decoder(layers.Layer):
         self.last_attn_scores = self.dec_layers[-1].last_attn_scores
         
         return x
+
+
+    def get_config(self):
+        config = super(self).get_config().copy()
+        config.update({ "d_dims"         : self.d_dims,
+                        "num_layers"     : self.num_layers,
+                        "pos_embedding"  : self.pos_embedding,
+                        "dropout"        : self.dropout,
+                        "dec_layers"     : self.dec_layers
+        })
+        return config
     
 
 class Transformer(keras.Model):
@@ -353,6 +426,7 @@ class Transformer(keras.Model):
 
         self.softmax = layers.Softmax()
     
+        
 
     def call(self, inputs):
         context, x = inputs
@@ -389,6 +463,17 @@ class Transformer(keras.Model):
         probs = self.softmax(logits)
         # Return the final output and the attention weights.
         return probs
+    
+    def get_config(self):
+        config = super(self).get_config().copy()
+        config.update({"encoder"    : self.encoder,
+                       "decoder"    : self.decoder,
+                       "reshape"    : self.reshape,
+                       "final_fc_1" : self.final_fc_1,
+                       "final_fc_2" : self.final_fc_2,
+                       "softmax"    : self.softmax
+        })
+        return config
 
 
 ###################################################################################################
