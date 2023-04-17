@@ -683,4 +683,4 @@ transformer.fit(
     #verbose='auto'
 )
 print("Saving Model")
-transformer.save(sys.argv[3])
+transformer.save(sys.argv[3], saved_format='tf')
