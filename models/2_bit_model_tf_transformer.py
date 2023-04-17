@@ -32,16 +32,16 @@ def read_data(filename):
 
     global Np
     Np = len(raw_data)
-    Np = 1000
+    #Np = 1000
 
     data = np.zeros((Np, 1, 4), dtype=np.double )
     hot_ones = np.zeros((Np, 1, 2), dtype=np.double)
 
     # Convert the tuple array into something usable
     for i in range(Np):
-        data[i, 0, 0] = float(raw_data[i][0] % 2**20)
+        data[i, 0, 0] = float(raw_data[i][0] % 2**16)
         data[i, 0, 1] = float(raw_data[i][1])
-        data[i, 0, 2] = float(raw_data[i][2] % 2**20)
+        data[i, 0, 2] = float(raw_data[i][2] % 2**16)
         data[i, 0, 3] = float(raw_data[i][3])
 
         if (raw_data[i][4] == 1): 
@@ -50,9 +50,9 @@ def read_data(filename):
             hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
 
     # Normalising the data
-    data[:, :, 0] = (data[:, :, 0] ) / float(2**20 - 1) #- 1
+    data[:, :, 0] = (data[:, :, 0] ) / float(2**16 - 1) #- 1
     data[:, :, 1] = (data[:, :, 1] ) / float(7        ) #- 1 
-    data[:, :, 2] = (data[:, :, 2] ) / float(2**20 - 1) #- 1
+    data[:, :, 2] = (data[:, :, 2] ) / float(2**16 - 1) #- 1
     #data[:, :, 3] = (data[:, :, 3] ) / float(1        )
 
     x_out = data#[:, :, 0:3]
@@ -115,7 +115,7 @@ class PositionalEmbedding(tf.keras.layers.Layer):
     return x
 
   def get_config(self):
-    config = super(self).get_config().copy()
+    config = super(PositionalEmbedding, self).get_config().copy()
     config.update({"d_dims"       : self.d_dims, 
                    "start"        : self.start,
                    "vocab_size"   : self.vocab_size,
@@ -134,7 +134,7 @@ class BaseAttention(layers.Layer):
         self.norm = layers.LayerNormalization()  
 
     def get_config(self):
-        config = super(self).get_config().copy()
+        config = super(BaseAttention, self).get_config().copy()
         config.update({ "mha"  : self.mha,
                         "add"  : self.add,
                         "norm" : self.norm
@@ -162,7 +162,7 @@ class CrossAttention(BaseAttention):
         return x
     
     def get_config(self):
-        return super(self).get_config().copy()
+        return super(CrossAttention, self).get_config().copy()
 
 
 # Found at the input side of the encoder, here we extract information from the input and take in information from all the inputs
@@ -184,7 +184,7 @@ class GlobalSelfAttention(BaseAttention):
         return x
     
     def get_config(self):
-        return super(self).get_config().copy()
+        return super(GlobalSelfAttention, self).get_config().copy()
 
 
 # Found at the input side of he decoder, takes in information from previous decoder inputs
@@ -209,7 +209,7 @@ class CausalSelfAttention(BaseAttention):
         return x
 
     def get_config(self):
-        return super(self).get_config().copy()
+        return super(CausalSelfAttention, self).get_config().copy()
 
 
 # Here we have the FC/Dense part of the encoder/decoder - this part is for classification and there is NO point of doing any feature 
@@ -236,7 +236,7 @@ class FeedForward(layers.Layer):
         return x
 
     def get_config(self):
-        config = super(self).get_config().copy()
+        config = super(FeedForward, self).get_config().copy()
         config.update({ "seq" : self.seq,
                         "add" : sef.add,
                         "norm": self.norm
@@ -264,7 +264,7 @@ class EncoderLayer(layers.Layer):
 
         return x
 
-    def get_config(self):
+    def get_config(EncoderLayer, self):
         config = super(self).get_config().copy()
         config.update({ "self_attention" : self.self_attention,
                         "ff"             : self.ff
@@ -302,7 +302,7 @@ class Encoder(layers.Layer):
 
 
     def get_config(self):
-        config = super(self).get_config().copy()
+        config = super(Encoder, self).get_config().copy()
         config.update({ "d_dims"         : self.d_dims,
                         "num_layers"     : self.num_layers,
                         "pos_embedding"  : self.pos_embedding,
@@ -342,7 +342,7 @@ class DecoderLayer(layers.Layer):
         return x
     
     def get_config(self):
-        config = super(self).get_config().copy()
+        config = super(DecoderLayer, self).get_config().copy()
         config.update({ "causal_self_attention" : self.causal_self_attention,
                         "cross_attention"       : self.cross_attention, 
                         "ff"                    : self.ff
@@ -388,7 +388,7 @@ class Decoder(layers.Layer):
 
 
     def get_config(self):
-        config = super(self).get_config().copy()
+        config = super(Decoder, self).get_config().copy()
         config.update({ "d_dims"         : self.d_dims,
                         "num_layers"     : self.num_layers,
                         "pos_embedding"  : self.pos_embedding,
@@ -465,7 +465,7 @@ class Transformer(keras.Model):
         return probs
     
     def get_config(self):
-        config = super(self).get_config().copy()
+        config = super(Transformer, self).get_config().copy()
         config.update({"encoder"    : self.encoder,
                        "decoder"    : self.decoder,
                        "reshape"    : self.reshape,
