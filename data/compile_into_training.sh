@@ -1,5 +1,5 @@
 # EDIT the variable BP here - then run the program
-export BP="BT_FNT"
+export BP=""
 
 cat ./bp_models/${BP}/pwd.bin > ./bp_models/${BP}/train.bin
 cat ./bp_models/${BP}/557_XZ.bin >> ./bp_models/${BP}/train.bin
