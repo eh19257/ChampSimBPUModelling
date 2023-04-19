@@ -687,22 +687,26 @@ transformer.fit(
 
 print("##### Validating #####")
 # Test1
-test_x_raw, test_y_raw = read_data()
+print("Testing file:\"{0}\"...".format(sys.argv[4]))
+test_x_raw, test_y_raw = read_data(sys.argv[4])
 test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
 transformer.evaluate(test)
 
 # Test2
-test_x_raw, test_y_raw = read_data()
+print("Testing file:\"{0}\"...".format(sys.argv[5]))
+test_x_raw, test_y_raw = read_data(sys.argv[5])
 test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
 transformer.evaluate(test)
 
 # Test3
-test_x_raw, test_y_raw = read_data()
+print("Testing file:\"{0}\"...".format(sys.argv[6]))
+test_x_raw, test_y_raw = read_data(sys.argv[6])
 test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
 transformer.evaluate(test)
 
 # Test4
-test_x_raw, test_y_raw = read_data()
+print("Testing file:\"{0}\"...".format(sys.argv[7]))
+test_x_raw, test_y_raw = read_data(sys.argv[7])
 test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
 transformer.evaluate(test)
 
