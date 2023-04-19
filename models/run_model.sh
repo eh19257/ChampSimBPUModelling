@@ -1,16 +1,16 @@
 #!/bin/bash
 
-#SBATCH --job-name 2_bit
+#SBATCH --job-name AT
 #SBATCH --partition gpu
 #SBATCH --nodes 1
 #SBATCH --gres gpu:0,gpu:1,gpu:2
 #SBATCH --mem 64GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/2_bit/log_%j.out
-#SBATCH -e ./outputs/2_bit/log_%j.err
+#SBATCH -o ./outputs/AT/log_%j.out
+#SBATCH -e ./outputs/AT/log_%j.err
 
 # EDIT
-export BP="2_bit"
+export BP="AT"
 
 echo "##### - Starting - #####"
 
