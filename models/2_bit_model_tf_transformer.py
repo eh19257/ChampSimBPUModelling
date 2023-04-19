@@ -32,7 +32,7 @@ def read_data(filename):
 
     global Np
     Np = len(raw_data)
-    Np = 1000
+    #Np = 1000
 
     data = np.zeros((Np, 1, 4), dtype=np.double )
     hot_ones = np.zeros((Np, 1, 2), dtype=np.double)
