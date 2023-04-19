@@ -1,0 +1,15 @@
+export PATH_TO_SPEC=/home/eh19257/Uni/FourthYear/ip/ChampSimBPUModelling/benchmarks/spec-cpu-2017/build
+
+#502.GCC:
+${PATH_TO_SPEC}/benchspec/CPU/502.gcc_r/run/run_base_test_Training-m64.0000/cpugcc_r_base.Training-m64 -fno-strict-aliasing -O3 -finline-limit=50000 ${PATH_TO_SPEC}/benchspec/CPU/502.gcc_r/data/test/input/t1.c
+
+
+#505.MCF
+${PATH_TO_SPEC}/benchspec/CPU/505.mcf_r/run/run_base_test_Training-m64.0000/mcf_r_base.Training-m64 ${PATH_TO_SPEC}/benchspec/CPU/505.mcf_r/data/test/input/inp.in
+
+
+#DEEPSJENG:
+${PATH_TO_SPEC}/benchspec/CPU/531.deepsjeng_r/run/run_base_test_Training-m64.0000/deepsjeng_r_base.Training-m64 ${PATH_TO_SPEC}/benchspec/CPU/531.deepsjeng_r/data/test/input/test.txt
+
+#LEELA:
+${PATH_TO_SPEC}/benchspec/CPU/541.leela_r/run/run_base_test_Training-m64.0000/leela_r_base.Training-m64 ${PATH_TO_SPEC}/benchspec/CPU/541.leela_r/data/test/input/test.sgf

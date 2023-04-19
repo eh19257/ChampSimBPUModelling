@@ -676,11 +676,36 @@ transformer.fit(
     train,
     #x=x_train,
     #y=y_train, 
-    epochs=10,
+    epochs=15,
     #batch_size=BATCH_SIZE,
     shuffle=True
     #validation_data=test
     #verbose='auto'
 )
+
+###################
+
+print("##### Validating #####")
+# Test1
+test_x_raw, test_y_raw = read_data()
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+# Test2
+test_x_raw, test_y_raw = read_data()
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+# Test3
+test_x_raw, test_y_raw = read_data()
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+# Test4
+test_x_raw, test_y_raw = read_data()
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+
 print("Saving Model")
 transformer.save(sys.argv[3], save_format='tf')
