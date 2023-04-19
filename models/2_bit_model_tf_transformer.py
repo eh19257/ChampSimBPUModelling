@@ -259,8 +259,8 @@ class EncoderLayer(layers.Layer):
         )
     
     def call(self, x):
-        x = self.self_attention(x); print("POST SELF ATTENTION:", x.shape)
-        x = self.ff(x); print("POST FF:", x.shape)
+        x = self.self_attention(x)#; print("POST SELF ATTENTION:", x.shape)
+        x = self.ff(x)#; print("POST FF:", x.shape)
 
         return x
 
@@ -293,11 +293,11 @@ class Encoder(layers.Layer):
         ]
 
     def call(self, x):
-        x = self.pos_embedding(x); print("POST POS_EMBEDDING:", x.shape)
-        x = self.dropout(x); print("POST DROPOUT:", x.shape)
+        x = self.pos_embedding(x)#; print("POST POS_EMBEDDING:", x.shape)
+        x = self.dropout(x)#; print("POST DROPOUT:", x.shape)
 
         for i in range(len(self.enc_layers)):
-            x = self.enc_layers[i](x); print("POST ENC_LAYERS:", x.shape)
+            x = self.enc_layers[i](x)#; print("POST ENC_LAYERS:", x.shape)
         return x
 
 
@@ -376,11 +376,11 @@ class Decoder(layers.Layer):
     
 
     def call(self, x, context):
-        x = self.pos_embedding(x); print("DEC POST POS_EMBED:", x.shape)
-        x = self.dropout(x); print("DEC POST DROPOUT:", x.shape)
+        x = self.pos_embedding(x)#; print("DEC POST POS_EMBED:", x.shape)
+        x = self.dropout(x)#; print("DEC POST DROPOUT:", x.shape)
 
         for i in range(self.num_layers):
-            x = self.dec_layers[i](x, context); print("DEC POST DEC_LAYERS:", x.shape)
+            x = self.dec_layers[i](x, context)#; print("DEC POST DEC_LAYERS:", x.shape)
 
         self.last_attn_scores = self.dec_layers[-1].last_attn_scores
         
@@ -432,22 +432,22 @@ class Transformer(keras.Model):
         context, x = inputs
         #tf.print("Inputs:", inputs)
         #tf.print(context)
-        print("CONTEXT:", context.shape); print("DECODER:", x.shape)
-        context = self.encoder(context); print("POST ENCODER:", context.shape)
+        #print("CONTEXT:", context.shape); print("DECODER:", x.shape)
+        context = self.encoder(context)#; print("POST ENCODER:", context.shape)
 
         x = self.decoder(x, context); #print("POST DECODER:", x)
 
         #logits = self.reshape(x)
 
-        print("PENULTIMATE SHAPE:", x.shape)
+        #print("PENULTIMATE SHAPE:", x.shape)
 
         logits = self.final_fc_1(x)
 
-        print("ULTIMATE SHAPE:", logits.shape)
+        #print("ULTIMATE SHAPE:", logits.shape)
 
         logits = self.final_fc_2(logits)
 
-        print("ULTIMATE ULTIMATE SHAPE:", logits.shape)
+        #print("ULTIMATE ULTIMATE SHAPE:", logits.shape)
 
 
         '''
@@ -650,7 +650,7 @@ transformer.compile(
 x_train_raw, y_train_raw = read_data(sys.argv[1])
 #x_test_raw , y_test_raw  = read_data(sys.argv[2])
 
-print("Size of x_train_raw:", x_train_raw.shape)
+#print("Size of x_train_raw:", x_train_raw.shape)
 
 #x_train, y_train = make_batches(x_train_raw, y_train_raw, h=HISTORY_TABLE_SIZE)
 #x_test,  y_test  = make_batches(x_test_raw,  y_test_raw, h=HISTORY_TABLE_SIZE)
@@ -664,7 +664,7 @@ train = DataGenerator(x_train_raw, y_train_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
 
 #print("Example Line:", train.__getitem__(1))
 (foo, bar), baz = train.__getitem__(1)
-print("enc:", foo.shape, ". Dec:", bar.shape, ". Labels:", baz.shape, ".")
+#print("enc:", foo.shape, ". Dec:", bar.shape, ". Labels:", baz.shape, ".")
 
 
 #for i in train: print("enc:", i[0][0].shape, ". Dec:", i[0][1].shape, ". Labels:", i[1].shape, ".")
