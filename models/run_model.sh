@@ -1,16 +1,16 @@
 #!/bin/bash
 
-#SBATCH --job-name gshare
+#SBATCH --job-name NT
 #SBATCH --partition gpu
 #SBATCH --nodes 1
 #SBATCH --gres gpu:0,gpu:1,gpu:2
 #SBATCH --mem 64GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/gshare/log_%j.out
-#SBATCH -e ./outputs/gshare/log_%j.err
+#SBATCH -o ./outputs/NT/log_%j.out
+#SBATCH -e ./outputs/NT/log_%j.err
 
 # EDIT
-export BP="gshare"
+export BP="NT"
 
 echo "##### - Starting - #####"
 
