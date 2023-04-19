@@ -5,7 +5,7 @@ export PATH_TO_SPEC="/vagrant/benchmarks/spec-cpu-2017/build"
 
 
 # EDIT the variable BP here - then run the program
-export BP="NT"
+export BP="perceptron"
 export TRACES="/vagrant/traces"
 export CHAMPSIM="/vagrant"
 ./config.sh config_${BP}.json

@@ -1,16 +1,16 @@
 #!/bin/bash
 
-#SBATCH --job-name NT
+#SBATCH --job-name perceptron
 #SBATCH --partition gpu
 #SBATCH --nodes 1
 #SBATCH --gres gpu:0,gpu:1,gpu:2
 #SBATCH --mem 64GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/NT/log_%j.out
-#SBATCH -e ./outputs/NT/log_%j.err
+#SBATCH -o ./outputs/perceptron/log_%j.out
+#SBATCH -e ./outputs/perceptron/log_%j.err
 
 # EDIT
-export BP="NT"
+export BP="perceptron"
 
 echo "##### - Starting - #####"
 
