@@ -1,14 +1,16 @@
 #!/bin/bash
 
-#SBATCH --job-name 0.001m16
+#SBATCH --job-name 2_bit
 #SBATCH --partition gpu
 #SBATCH --nodes 1
 #SBATCH --gres gpu:0,gpu:1,gpu:2
 #SBATCH --mem 64GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/lr0.1pwd_test/log_%j.out
-#SBATCH -e ./outputs/lr0.1pwd_test/log_%j.err
+#SBATCH -o ./outputs/2_bit/log_%j.out
+#SBATCH -e ./outputs/2_bit/log_%j.err
 
+# EDIT
+export BP="2_bit"
 
 echo "##### - Starting - #####"
 
@@ -22,4 +24,4 @@ export LD_LIBRARY_PATH=:$LD_LIBRARY_PATH:/sw/lang/cuda_11.2.2/targets/x86_64-lin
 # allocate async memory or smth (apparently it helps)
 export TF_GPU_ALLOCATOR=cuda_malloc_async
 
-python3 2_bit_model_tf_transformer.py ../../data/bp_models/2_bit/pwd.bin ../../data/bp_models/2_bit/ls.bin .outputs/lr0.1pwd_test/SAVED_MODEL
+python3 2_bit_model_tf_transformer.py ../../data/bp_models/${BP}/train.bin ../../data/bp_models/${BP}/541.LEELA.bin ../../data/bp_models/${BP}/525.X264.bin ../../data/bp_models/${BP}/502.GCC.bin ../../data/bp_models/${BP}/505.MCF.bin .outputs/${BP}/SAVED_MODEL

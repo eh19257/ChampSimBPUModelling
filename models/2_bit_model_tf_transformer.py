@@ -32,7 +32,7 @@ def read_data(filename):
 
     global Np
     Np = len(raw_data)
-    #Np = 1000
+    Np = 1000
 
     data = np.zeros((Np, 1, 4), dtype=np.double )
     hot_ones = np.zeros((Np, 1, 2), dtype=np.double)
@@ -687,29 +687,29 @@ transformer.fit(
 
 print("##### Validating #####")
 # Test1
+print("Testing file:\"{0}\"...".format(sys.argv[2]))
+test_x_raw, test_y_raw = read_data(sys.argv[2])
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+# Test2
+print("Testing file:\"{0}\"...".format(sys.argv[3]))
+test_x_raw, test_y_raw = read_data(sys.argv[3])
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+# Test3
 print("Testing file:\"{0}\"...".format(sys.argv[4]))
 test_x_raw, test_y_raw = read_data(sys.argv[4])
 test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
 transformer.evaluate(test)
 
-# Test2
+# Test4
 print("Testing file:\"{0}\"...".format(sys.argv[5]))
 test_x_raw, test_y_raw = read_data(sys.argv[5])
 test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
 transformer.evaluate(test)
 
-# Test3
-print("Testing file:\"{0}\"...".format(sys.argv[6]))
-test_x_raw, test_y_raw = read_data(sys.argv[6])
-test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
-transformer.evaluate(test)
-
-# Test4
-print("Testing file:\"{0}\"...".format(sys.argv[7]))
-test_x_raw, test_y_raw = read_data(sys.argv[7])
-test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
-transformer.evaluate(test)
-
 
 print("Saving Model")
-transformer.save(sys.argv[3], save_format='tf')
+transformer.save(sys.argv[6], save_format='tf')
