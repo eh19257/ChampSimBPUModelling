@@ -1,16 +1,16 @@
 #!/bin/bash
 
-#SBATCH --job-name NT
+#SBATCH --job-name BT_FNT
 #SBATCH --partition gpu
 #SBATCH --nodes 1
 #SBATCH --gres gpu:0,gpu:1,gpu:2
 #SBATCH --mem 64GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/NT/log_%j.out
-#SBATCH -e ./outputs/NT/log_%j.err
+#SBATCH -o ./outputs/BT_FNT/log_%j.out
+#SBATCH -e ./outputs/BT_FNT/log_%j.err
 
 # EDIT
-export BP="NT"
+export BP="BT_FNT"
 
 echo "##### - Starting - #####"
 
