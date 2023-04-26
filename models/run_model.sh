@@ -6,8 +6,8 @@
 #SBATCH --gres gpu:0,gpu:1,gpu:2
 #SBATCH --mem 64GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/perceptron/log_%j.out
-#SBATCH -e ./outputs/perceptron/log_%j.err
+#SBATCH -o ./outputs/perceptron/log_64.out
+#SBATCH -e ./outputs/perceptron/log_64.err
 
 # EDIT
 export BP="perceptron"
