@@ -622,7 +622,7 @@ d_dims = 64#128
 ff_fc = 64#128
 num_heads = 4
 dropout_rate = 0.1
-HISTORY_TABLE_SIZE = 64
+HISTORY_TABLE_SIZE = 256
 
 BATCH_SIZE = 128
 #BUFFER_SIZE = 1000 # The number of elements and NOT the number of bytes for the buffer
