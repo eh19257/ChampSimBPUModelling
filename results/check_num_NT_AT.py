@@ -7,8 +7,8 @@ bp_model_packet = np.dtype([
         ("ip", '<u8'),
         ("branch_type", '<u8'),
         ("branch_addr", '<u8'),
-        ("actual_branch_behaviour", '<u8'),
-        ("branch_prediciton", '<u8')
+        ("branch_prediciton", '<u8'),
+        ("actual_branch_behaviour", '<u8')
     ])
 
 SIZE_OF_PACKET = 8 * len(bp_model_packet)
@@ -34,9 +34,9 @@ def read_data(filename):
         data[i, 0, 0] = float(raw_data[i][0] % 2**16)
         data[i, 0, 1] = float(raw_data[i][1])
         data[i, 0, 2] = float(raw_data[i][2] % 2**16)
-        data[i, 0, 3] = float(raw_data[i][3])
+        data[i, 0, 3] = float(raw_data[i][4])
 
-        if (raw_data[i][4] == 1): 
+        if (raw_data[i][3] == 1): 
             hot_ones[i, 0] = np.array([1, 0], dtype=np.double)
         else:
             hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
@@ -62,6 +62,7 @@ num_t  = 0
 num_nt = 0
 
 for i in range(len(x)):
+    print(x[i, 0], y[i])
     if x[i, 0, 3] == 1 : num_t  += 1
     else               : num_nt += 1
 
