@@ -39,6 +39,8 @@ def read_data(filename):
     data[i, 0, 2] = raw_data[i][2]# / float(2**8 - 1)
     #data[i, 0, 3] = raw_data[i][3]
 
+    print(data[i, 0, 0])
+
     '''
     data[i, 0, 0] = (float(raw_data[i][0] * 2) / float(2**16 - 1)) - 1
     data[i, 0, 1] = (float(raw_data[i][1] * 2) / float(7)) - 1
@@ -137,7 +139,6 @@ class Model(tf.keras.Model):
                                         strides=2,
                                         padding="valid",
                                         data_format="channels_last")
-        
         # Conv layer 2 - consists of 64x (32, 3) filters/kernels to form an output of the shape (64, 1, 8)
         self.conv2 = layers.Conv1D(64,
                                   3,
@@ -243,8 +244,8 @@ print("Single output", x_train[0].shape)
 print("shape", y_train.shape)
 print("Single output", y_train[0].shape)
 '''
-for i in range(Np):
-  print(x_train[i][0], y_train[i][0])
+#for i in range(Np):
+  #print(x_train[i][0], y_train[i][0])
 
 model = Model()
 model.compile(
