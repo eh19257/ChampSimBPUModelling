@@ -14,8 +14,8 @@ bp_model_packet = np.dtype([
         ("ip", '<u8'),
         ("branch_type", '<u8'),
         ("branch_addr", '<u8'),
-        ("actual_branch_behaviour", '<u8'),
-        ("branch_prediciton", '<u8')
+        ("branch_prediciton", '<u8'),
+        ("actual_branch_behaviour", '<u8')
     ])
 
 SIZE_OF_PACKET = 8 * len(bp_model_packet)
