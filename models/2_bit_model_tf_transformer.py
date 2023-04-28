@@ -42,9 +42,9 @@ def read_data(filename):
         data[i, 0, 0] = float(raw_data[i][0] % 2**16)
         data[i, 0, 1] = float(raw_data[i][1])
         data[i, 0, 2] = float(raw_data[i][2] % 2**16)
-        data[i, 0, 3] = float(raw_data[i][3])
+        data[i, 0, 3] = float(raw_data[i][4])
 
-        if (raw_data[i][4] == 1): 
+        if (raw_data[i][3] == 1): 
             hot_ones[i, 0] = np.array([1, 0], dtype=np.double)
         else:
             hot_ones[i, 0] = np.array([0, 1], dtype=np.double)
@@ -663,13 +663,13 @@ train = DataGenerator(x_train_raw, y_train_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
 
 
 #print("Example Line:", train.__getitem__(1))
-(foo, bar), baz = train.__getitem__(1)
+#(foo, bar), baz = train.__getitem__(1)
 #print("enc:", foo.shape, ". Dec:", bar.shape, ". Labels:", baz.shape, ".")
 
 
 #for i in train: print("enc:", i[0][0].shape, ". Dec:", i[0][1].shape, ". Labels:", i[1].shape, ".")
-#transformer(train.__getitem__(0)[0])
-#transformer.summary()
+transformer(train.__getitem__(0)[0])
+transformer.summary()
 
 print("STARTING TRAINING!!!")
 transformer.fit(
