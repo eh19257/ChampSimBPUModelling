@@ -1,15 +1,15 @@
 #!/bin/bash
 
-#SBATCH --job-name rnn_2_bit
+#SBATCH --job-name rnn_AT
 #SBATCH --partition compute
 #SBATCH --nodes 1
 #SBATCH --mem 16GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/2_bit/log_rnn.out
-#SBATCH -e ./outputs/2_bit/log_rnn.err
+#SBATCH -o ./outputs/AT/log_rnn.out
+#SBATCH -e ./outputs/AT/log_rnn.err
 
 # EDIT
-export BP="2_bit"
+export BP="AT"
 
 echo "##### - Starting - #####"
 
