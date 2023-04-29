@@ -1,0 +1,12 @@
+cpu-bind=MASK - bp1-gpu035, task  0  0 [88066]: mask 0x40000000000000004000000000000000 set
+2023-04-16 20:51:32.271473: I tensorflow/core/platform/cpu_feature_guard.cc:151] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-04-16 20:51:32.685725: I tensorflow/core/common_runtime/gpu/gpu_process_state.cc:214] Using CUDA malloc Async allocator for GPU: 0
+2023-04-16 20:51:32.685963: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1525] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 7936 MB memory:  -> device: 0, name: NVIDIA A100-SXM4-80GB MIG 1g.10gb, pci bus id: 0000:81:00.0, compute capability: 8.0
+2023-04-16 20:51:56.435465: I tensorflow/stream_executor/cuda/cuda_blas.cc:1774] TensorFloat-32 will be used for the matrix multiplication. This will only be logged once.
+2023-04-16 20:51:56.904862: I tensorflow/stream_executor/cuda/cuda_dnn.cc:366] Loaded cuDNN version 8101
+WARNING:tensorflow:Skipping full serialization of Keras layer <keras.layers.core.reshape.Reshape object at 0x7fa06b606340>, because it is not built.
+2023-04-17 01:53:19.581976: W tensorflow/python/util/util.cc:368] Sets are not currently considered sequences, but this may change in the future, so consider avoiding using them.
+WARNING:absl:Found untraced functions such as positional_embedding_layer_call_fn, positional_embedding_layer_call_and_return_conditional_losses, dropout_layer_call_fn, dropout_layer_call_and_return_conditional_losses, positional_embedding_1_layer_call_fn while saving (showing 5 of 790). These functions will not be directly callable after loading.
+/sw/lang/anaconda.3.9.7-2021.12-tensorflow.2.7.0/lib/python3.9/site-packages/keras/saving/saved_model/layer_serialization.py:112: CustomMaskWarning: Custom mask layers require a config and must override get_config. When loading, the custom mask layer must be passed to the custom_objects argument.
+  return generic_utils.serialize_keras_object(obj)

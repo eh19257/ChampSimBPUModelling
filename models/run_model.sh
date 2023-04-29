@@ -6,11 +6,12 @@
 #SBATCH --gres gpu:0,gpu:1,gpu:2
 #SBATCH --mem 64GB
 #SBATCH --account=COSC027924
-#SBATCH -o ./outputs/perceptron/log_32.out
-#SBATCH -e ./outputs/perceptron/log_32.err
+#SBATCH -o ./outputs/perceptron/log_MK3_128.out
+#SBATCH -e ./outputs/perceptron/log_MK3_128.err
 
 # EDIT
 export BP="perceptron"
+export HISTORY="128"
 
 echo "##### - Starting - #####"
 
@@ -24,4 +25,4 @@ export LD_LIBRARY_PATH=:$LD_LIBRARY_PATH:/sw/lang/cuda_11.2.2/targets/x86_64-lin
 # allocate async memory or smth (apparently it helps)
 export TF_GPU_ALLOCATOR=cuda_malloc_async
 
-python3 2_bit_model_tf_transformer.py ../../data/bp_models/${BP}/train.bin ../../data/bp_models/${BP}/541.LEELA.bin ../../data/bp_models/${BP}/525.X264.bin ../../data/bp_models/${BP}/502.GCC.bin ../../data/bp_models/${BP}/505.MCF.bin .outputs/${BP}/SAVED_MODEL
+python3 2_bit_model_tf_transformer.py ../../data/bp_models/${BP}/train.bin ../../data/bp_models/${BP}/541.LEELA.bin ../../data/bp_models/${BP}/525.X264.bin ../../data/bp_models/${BP}/502.GCC.bin ../../data/bp_models/${BP}/505.MCF.bin .outputs/${BP}/SAVED_MODEL ${HISTORY}

@@ -1,0 +1,2 @@
+cpu-bind=MASK - bp1-gpu013, task  0  0 [228474]: mask 0x2020 set
+/sw/lang/anaconda.3.9.7-2021.12-tensorflow.2.7.0/bin/python3: can't open file '/user/work/eh19257/ChampSimBPUModelling/2_bit_model_tf.py': [Errno 2] No such file or directory
