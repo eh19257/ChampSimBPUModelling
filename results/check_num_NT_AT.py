@@ -66,4 +66,5 @@ for i in range(len(x)):
     if x[i, 0, 3] == 1 : num_t  += 1
     else               : num_nt += 1
 
+print("The total number of instructions was {0}.".format(len(x)))
 print("TAKEN: {0}. NOT TAKEN: {1}. There were {2} more taken than not taken".format(num_t, num_nt, num_t/num_nt))
