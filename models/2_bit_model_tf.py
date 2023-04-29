@@ -39,7 +39,7 @@ def read_data(filename):
     data[i, 0, 2] = raw_data[i][2]# / float(2**8 - 1)
     #data[i, 0, 3] = raw_data[i][3]
 
-    print(data[i, 0, 0])
+    #print(data[i, 0, 0])
 
     '''
     data[i, 0, 0] = (float(raw_data[i][0] * 2) / float(2**16 - 1)) - 1
@@ -271,7 +271,7 @@ model.summary()
 
 model.fit(x_train,
           y_train, 
-          epochs=10,
+          epochs=15,
           batch_size=1000,
           shuffle=False
           #validation_data=(x_test, y_test)
@@ -284,3 +284,34 @@ non_branch_test =  np.array([[[140084140304600 * 2/(2**64 - 1), 0 , 0 * 2/(2**64
 print("Shape of branch test", branch_test.shape)
 print("\nThe BRANCH test for {2} was: {0}\nThe NO_BRANCH test for {3} was: {1}.".format(model.predict(branch_test), model.predict(non_branch_test), branch_test, non_branch_test))
 
+
+###################
+
+print("##### Validating #####")
+# Test1
+print("Testing file:\"{0}\"...".format(sys.argv[2]))
+test_x_raw, test_y_raw = read_data(sys.argv[2])
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+# Test2
+print("Testing file:\"{0}\"...".format(sys.argv[3]))
+test_x_raw, test_y_raw = read_data(sys.argv[3])
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+# Test3
+print("Testing file:\"{0}\"...".format(sys.argv[4]))
+test_x_raw, test_y_raw = read_data(sys.argv[4])
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+# Test4
+print("Testing file:\"{0}\"...".format(sys.argv[5]))
+test_x_raw, test_y_raw = read_data(sys.argv[5])
+test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
+transformer.evaluate(test)
+
+
+print("Saving Model")
+transformer.save(sys.argv[6], save_format='tf')
