@@ -1,10 +1,9 @@
 #!/bin/bash
 
 #SBATCH --job-name rnn_2_bit
-#SBATCH --partition gpu
+#SBATCH --partition compute
 #SBATCH --nodes 1
-#SBATCH --gres gpu:0,gpu:1,gpu:2
-#SBATCH --mem 64GB
+#SBATCH --mem 16GB
 #SBATCH --account=COSC027924
 #SBATCH -o ./outputs/2_bit/log_rnn.out
 #SBATCH -e ./outputs/2_bit/log_rnn.err
