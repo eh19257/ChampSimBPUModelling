@@ -290,27 +290,23 @@ print("\nThe BRANCH test for {2} was: {0}\nThe NO_BRANCH test for {3} was: {1}."
 print("##### Validating #####")
 # Test1
 print("Testing file:\"{0}\"...".format(sys.argv[2]))
-test_x_raw, test_y_raw = read_data(sys.argv[2])
-test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
-transformer.evaluate(test)
+test_x, test_y = read_data(sys.argv[2])
+transformer.evaluate(test_x, test_y)
 
 # Test2
 print("Testing file:\"{0}\"...".format(sys.argv[3]))
-test_x_raw, test_y_raw = read_data(sys.argv[3])
-test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
-transformer.evaluate(test)
+test_x, test_y = read_data(sys.argv[3])
+transformer.evaluate(test_x, test_y)
 
 # Test3
 print("Testing file:\"{0}\"...".format(sys.argv[4]))
-test_x_raw, test_y_raw = read_data(sys.argv[4])
-test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
-transformer.evaluate(test)
+test_x, test_y = read_data(sys.argv[4])
+transformer.evaluate(test_x, test_y)
 
 # Test4
 print("Testing file:\"{0}\"...".format(sys.argv[5]))
-test_x_raw, test_y_raw = read_data(sys.argv[5])
-test = DataGenerator(test_x_raw, test_y_raw, BATCH_SIZE, HISTORY_TABLE_SIZE)
-transformer.evaluate(test)
+test_x, test_y = read_data(sys.argv[5])
+transformer.evaluate(test_x, test_y)
 
 
 print("Saving Model")
